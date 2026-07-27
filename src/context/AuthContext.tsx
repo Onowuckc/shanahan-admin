@@ -6,6 +6,7 @@ interface AuthUser {
   email: string;
   username: string;
   role: string;
+  roles?: string[];
   firstName?: string;
   lastName?: string;
 }
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: '',
       username: username,
       role,
+      roles: data.roles || (role ? [role] : []),
       firstName: profile?.firstName || '',
       lastName: profile?.lastName || '',
     };
