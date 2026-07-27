@@ -9,6 +9,7 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/students': { title: 'Students', subtitle: 'Student Records Management' },
   '/staff': { title: 'Staff', subtitle: 'Staff Profiles' },
   '/applicants': { title: 'Applicants', subtitle: 'Admission Applications' },
+  '/biodata-requests': { title: 'Biodata Requests', subtitle: 'Review & Approve Student Biodata Changes' },
   '/academic/faculties': { title: 'Faculties & Departments', subtitle: 'Academic Structure' },
   '/academic/programs': { title: 'Programmes', subtitle: 'Degree Programmes' },
   '/academic/courses': { title: 'Courses', subtitle: 'Course Catalogue' },

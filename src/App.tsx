@@ -22,6 +22,7 @@ import AuditLogsPage from './pages/AuditLogsPage';
 import SettingsPage from './pages/SettingsPage';
 import MyProfilePage from './pages/MyProfilePage';
 import OLevelRequirementsPage from './pages/OLevelRequirementsPage';
+import BiodataRequestsPage from './pages/BiodataRequestsPage';
 
 
 export default function App() {
@@ -42,6 +43,7 @@ export default function App() {
             <Route path="/students/:id" element={<StudentDetailPage />} />
             <Route path="/staff" element={<StaffPage />} />
             <Route path="/applicants" element={<ApplicantsPage />} />
+            <Route path="/biodata-requests" element={<BiodataRequestsPage />} />
 
             {/* Academic */}
             <Route path="/academic/faculties" element={<FacultiesPage />} />
