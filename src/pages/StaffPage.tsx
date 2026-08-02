@@ -37,6 +37,7 @@ export default function StaffPage() {
   // Modals
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   
   // Upload State
@@ -118,6 +119,20 @@ export default function StaffPage() {
     } catch (err) {
       console.error(err);
       showToast('Failed to update staff profile.');
+    }
+  };
+
+  const handleDeleteStaff = async () => {
+    if (!selectedStaff) return;
+    try {
+      await api.delete(`/admin/staff/${selectedStaff.id}`);
+      showToast('Staff member account deleted successfully.');
+      setShowDeleteModal(false);
+      setSelectedStaff(null);
+      fetchStaff();
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.response?.data?.error || 'Failed to delete staff member account.');
     }
   };
 
@@ -242,8 +257,11 @@ export default function StaffPage() {
                         ))
                     ) : '—'}
                   </td>
-                  <td>
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleEditClick(s)}>✏️ Edit</button>
+                  <td style={{ textAlign: 'right' }}>
+                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                      <button className="btn btn-ghost btn-sm" onClick={() => handleEditClick(s)}>✏️ Edit</button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-400)' }} onClick={() => { setSelectedStaff(s); setShowDeleteModal(true); }}>🗑️ Delete</button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -378,6 +396,44 @@ export default function StaffPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedStaff && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ color: 'var(--danger-400)' }}>⚠️ Confirm Delete Staff Account</h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(false)}>✕</button>
+            </div>
+            <div style={{ padding: '12px 0' }}>
+              <p style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 12 }}>
+                Are you sure you want to delete the staff account for <strong>{selectedStaff.firstName} {selectedStaff.lastName}</strong>?
+              </p>
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                padding: '12px 16px',
+                fontSize: 13,
+                color: 'var(--danger-300)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4
+              }}>
+                <div><strong>Staff ID:</strong> {selectedStaff.staffId}</div>
+                <div><strong>Email:</strong> {selectedStaff.user?.email || 'N/A'}</div>
+                <div><strong>Role:</strong> {selectedStaff.user?.role || 'N/A'}</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>🚨 Warning: This action cannot be undone and will permanently remove staff login credentials and profile records.</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+              <button className="btn btn-ghost" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button className="btn btn-danger" onClick={handleDeleteStaff}>
+                🗑️ Delete Staff Account
+              </button>
+            </div>
           </div>
         </div>
       )}
