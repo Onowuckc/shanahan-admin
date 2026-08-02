@@ -72,11 +72,18 @@ export default function UsersPage() {
 
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<AdminUser | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState<AdminUser | null>(null);
   const [showResetModal, setShowResetModal] = useState<AdminUser | null>(null);
   const [showRoleModal, setShowRoleModal] = useState<AdminUser | null>(null);
 
   const [createForm, setCreateForm] = useState<CreateUserForm>({
     firstName: '', lastName: '', email: '', staffId: '', role: 'REGISTRY_STAFF', roles: ['REGISTRY_STAFF'], phoneNumber: '', departmentId: '',
+  });
+  const [editForm, setEditForm] = useState<{
+    firstName: string; lastName: string; email: string; phoneNumber: string; departmentId: string; roles: string[];
+  }>({
+    firstName: '', lastName: '', email: '', phoneNumber: '', departmentId: '', roles: []
   });
   const [resetPassword, setResetPassword] = useState('');
   const [newRoles, setNewRoles] = useState<string[]>([]);
@@ -121,6 +128,43 @@ export default function UsersPage() {
       fetchUsers();
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed to create user.', 'danger');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ─── EDIT USER ──────────────────────────────────────────────────────────────
+  const handleEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!showEditModal) return;
+    if (!editForm.roles || editForm.roles.length === 0) {
+      showToast('At least one role must be selected.', 'danger');
+      return;
+    }
+    setActionLoading(true);
+    try {
+      await api.put(`/admin/users/${showEditModal.user.id}`, editForm);
+      showToast(`User ${showEditModal.staffId} updated successfully!`);
+      setShowEditModal(null);
+      fetchUsers();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update user.', 'danger');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // ─── DELETE USER ────────────────────────────────────────────────────────────
+  const handleDeleteUser = async () => {
+    if (!showDeleteModal) return;
+    setActionLoading(true);
+    try {
+      await api.delete(`/admin/users/${showDeleteModal.user.id}`);
+      showToast(`User account ${showDeleteModal.staffId} deleted successfully.`);
+      setShowDeleteModal(null);
+      fetchUsers();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to delete user account.', 'danger');
     } finally {
       setActionLoading(false);
     }
@@ -300,6 +344,26 @@ export default function UsersPage() {
                   </td>
                   <td>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      {/* Edit Account details — SUPER_ADMIN or ICT_ADMIN */}
+                      <button
+                        className="btn btn-ghost btn-sm"
+                        title="Edit account details"
+                        onClick={() => {
+                          setShowEditModal(u);
+                          setEditForm({
+                            firstName: u.firstName,
+                            lastName: u.lastName,
+                            email: u.user.email,
+                            phoneNumber: u.phoneNumber || '',
+                            departmentId: (u as any).departmentId || '',
+                            roles: (u.user as any).roles || [u.user.role],
+                          });
+                        }}
+                        style={{ fontSize: 12 }}
+                      >
+                        ✏️ Edit
+                      </button>
+
                       {/* Reset password — SUPER_ADMIN or ICT_ADMIN */}
                       <button
                         className="btn btn-ghost btn-sm"
@@ -309,6 +373,7 @@ export default function UsersPage() {
                       >
                         🔑 Reset PW
                       </button>
+
                       {/* Change role — SUPER_ADMIN only */}
                       {isSuperAdmin && (
                         <button
@@ -318,6 +383,18 @@ export default function UsersPage() {
                           style={{ fontSize: 12 }}
                         >
                           🎭 Roles
+                        </button>
+                      )}
+
+                      {/* Delete User — SUPER_ADMIN (cannot delete self) */}
+                      {isSuperAdmin && currentUser?.id !== u.user.id && (
+                        <button
+                          className="btn btn-ghost btn-sm"
+                          title="Delete user account"
+                          onClick={() => setShowDeleteModal(u)}
+                          style={{ fontSize: 12, color: 'var(--danger-400)' }}
+                        >
+                          🗑️ Delete
                         </button>
                       )}
                     </div>
@@ -510,6 +587,130 @@ export default function UsersPage() {
               <button className="btn btn-ghost" onClick={() => setShowRoleModal(null)}>Cancel</button>
               <button className="btn btn-primary" disabled={actionLoading || newRoles.length === 0} onClick={handleChangeRole}>
                 {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Updating...</> : '🎭 Update Roles'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ─── EDIT USER MODAL ───────────────────────────────────────── */}
+      {showEditModal && (
+        <div className="modal-overlay" onClick={() => setShowEditModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="modal-header">
+              <h3 className="modal-title">Edit Admin User ({showEditModal.staffId})</h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowEditModal(null)}>✕</button>
+            </div>
+            <form onSubmit={handleEditUser}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                <div className="form-group">
+                  <label className="form-label">First Name *</label>
+                  <input className="form-control" required value={editForm.firstName}
+                    onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} placeholder="First name" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Last Name *</label>
+                  <input className="form-control" required value={editForm.lastName}
+                    onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} placeholder="Last name" />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email Address *</label>
+                <input className="form-control" type="email" required value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} placeholder="staff@shanahanuni.edu.ng" />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input className="form-control" type="tel" value={editForm.phoneNumber}
+                  onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })} placeholder="080xxxxxxxx" />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">System Roles *</label>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '8px 16px',
+                  padding: '12px',
+                  background: 'var(--surface-2)',
+                  borderRadius: 'var(--radius-md)',
+                  maxHeight: '160px',
+                  overflowY: 'auto',
+                  border: '1px solid var(--border-default)'
+                }}>
+                  {ALL_ADMIN_ROLES.map((r) => {
+                    const isChecked = editForm.roles?.includes(r);
+                    return (
+                      <label key={r} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, cursor: 'pointer', margin: 0 }}>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          style={{ width: 15, height: 15 }}
+                          onChange={(e) => {
+                            let updatedRoles = [...(editForm.roles || [])];
+                            if (e.target.checked) {
+                              updatedRoles.push(r);
+                            } else {
+                              updatedRoles = updatedRoles.filter(x => x !== r);
+                            }
+                            setEditForm({
+                              ...editForm,
+                              roles: updatedRoles,
+                            });
+                          }}
+                        />
+                        {roleLabel(r)}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
+                <button type="button" className="btn btn-ghost" onClick={() => setShowEditModal(null)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={actionLoading}>
+                  {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Saving...</> : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─── DELETE USER CONFIRMATION MODAL ───────────────────────── */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={() => setShowDeleteModal(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h3 className="modal-title" style={{ color: 'var(--danger-400)' }}>⚠️ Confirm User Deletion</h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(null)}>✕</button>
+            </div>
+            <div style={{ padding: '12px 0' }}>
+              <p style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 12 }}>
+                Are you sure you want to permanently delete the user account for <strong>{showDeleteModal.firstName} {showDeleteModal.lastName}</strong>?
+              </p>
+              <div style={{
+                background: 'rgba(239, 68, 68, 0.1)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                borderRadius: 'var(--radius-md)',
+                padding: '12px 16px',
+                fontSize: 13,
+                color: 'var(--danger-300)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 4
+              }}>
+                <div><strong>Staff ID:</strong> {showDeleteModal.staffId}</div>
+                <div><strong>Email:</strong> {showDeleteModal.user.email}</div>
+                <div><strong>Role:</strong> {showDeleteModal.user.role}</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>🚨 Warning: This action cannot be undone and will permanently remove all user credentials and associated profiles.</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
+              <button className="btn btn-ghost" onClick={() => setShowDeleteModal(null)}>Cancel</button>
+              <button className="btn btn-danger" disabled={actionLoading} onClick={handleDeleteUser}>
+                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Deleting...</> : '🗑️ Delete User Account'}
               </button>
             </div>
           </div>
