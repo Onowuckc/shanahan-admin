@@ -18,28 +18,43 @@ export default function ReportsPage() {
       });
   }, []);
 
-  const handleExport = (reportType: string) => {
-    alert(`Exporting ${reportType} Report as CSV file... (Simulated file download: shanahan_${reportType.toLowerCase()}_report.csv)`);
-    // Create a mock CSV structure and download it
-    let csvContent = "data:text/csv;charset=utf-8,";
-    if (reportType === 'Students') {
-      csvContent += "Matric Number,First Name,Last Name,Level,Department\n";
-      csvContent += "SU/CMP/26/1001,John,Doe,100,Computer Science\n";
-      csvContent += "SU/CMP/26/1002,Jane,Smith,200,Computer Science\n";
-    } else if (reportType === 'Finance') {
-      csvContent += "Payment Reference,Student,Amount Paid,Status,Date\n";
-      csvContent += "TX-12345,John Doe,50000.00,COMPLETED,2026-06-18\n";
-    } else {
-      csvContent += "Staff ID,First Name,Last Name,Role,Department\n";
-      csvContent += "ST-001,Prof. Charles,Xavier,LECTURER,Computer Science\n";
+  const handleExport = async (reportType: string) => {
+    try {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      if (reportType === 'Students') {
+        csvContent += "Matric Number,First Name,Last Name,Level,Department\n";
+        const res = await api.get('/admin/students?limit=1000');
+        const students = res.data.data || [];
+        students.forEach((s: any) => {
+          csvContent += `"${s.matricNumber || ''}","${s.firstName || ''}","${s.lastName || ''}","${s.level || ''}","${s.department?.name || ''}"\n`;
+        });
+      } else if (reportType === 'Finance') {
+        csvContent += "Payment Reference,Student,Amount Paid,Status,Date\n";
+        const res = await api.get('/admin/payments?limit=1000');
+        const payments = res.data.data || [];
+        payments.forEach((p: any) => {
+          const studentName = p.student ? `${p.student.firstName} ${p.student.lastName}` : 'N/A';
+          csvContent += `"${p.txReference || p.id}","${studentName}","${p.amountPaid}","${p.status}","${p.createdAt?.split('T')[0] || ''}"\n`;
+        });
+      } else {
+        csvContent += "Staff ID,First Name,Last Name,Role,Department\n";
+        const res = await api.get('/admin/staff?limit=1000');
+        const staffList = res.data.data || [];
+        staffList.forEach((st: any) => {
+          csvContent += `"${st.staffId || ''}","${st.firstName || ''}","${st.lastName || ''}","${st.user?.role || ''}","${st.department?.name || ''}"\n`;
+        });
+      }
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `shanahan_${reportType.toLowerCase()}_report.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      console.error(e);
+      alert('Failed to export report.');
     }
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `shanahan_${reportType.toLowerCase()}_report.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
   };
 
   if (loading) return <div className="loading-page"><div className="spinner" /></div>;
