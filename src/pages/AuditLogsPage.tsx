@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { SearchIcon, ShieldIcon } from '../components/Icons';
 
 interface AuditLog {
   id: string;
@@ -69,7 +70,7 @@ export default function AuditLogsPage() {
       {/* Filters */}
       <div className="filters-bar" style={{ gap: 12 }}>
         <div className="search-input-wrapper" style={{ minWidth: 200 }}>
-          <span>🔍</span>
+          <SearchIcon size={15} color="var(--text-muted)" />
           <input
             placeholder="Search action..."
             value={actionFilter}
@@ -102,7 +103,7 @@ export default function AuditLogsPage() {
           </div>
         ) : logs.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🔒</div>
+            <div className="empty-state-icon"><ShieldIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No audit logs found</div>
           </div>
         ) : (

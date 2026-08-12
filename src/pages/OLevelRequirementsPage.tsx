@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { AcademicIcon, EditIcon, CrossIcon } from '../components/Icons';
 
 interface Program {
   id: string;
@@ -123,7 +124,7 @@ export default function OLevelRequirementsPage() {
           </div>
         ) : programs.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📚</div>
+            <div className="empty-state-icon"><AcademicIcon size={48} color="var(--text-muted)" /></div>
             <div className="empty-state-title">No academic programs found</div>
           </div>
         ) : (
@@ -179,7 +180,7 @@ export default function OLevelRequirementsPage() {
                     </td>
                     <td>
                       <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(p)}>
-                        ✏️ Edit Requirements
+                        <EditIcon size={14} /><span style={{ marginLeft: 4 }}>Edit Requirements</span>
                       </button>
                     </td>
                   </tr>
@@ -196,7 +197,7 @@ export default function OLevelRequirementsPage() {
           <div className="modal" style={{ maxWidth: 480 }}>
             <div className="modal-header">
               <h3 className="modal-title">Configure Requirements</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

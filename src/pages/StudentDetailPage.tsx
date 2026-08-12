@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { MapPinIcon, FileIcon, FolderIcon, PaymentsIcon, AcademicIcon, HostelsIcon, EditIcon, CheckIcon, CrossIcon, ArrowLeftIcon } from '../components/Icons';
+
 
 interface CustomField {
   name: string;
@@ -119,14 +121,14 @@ export default function StudentDetailPage() {
       {/* Header */}
       <div className="page-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => navigate('/students')}>←</button>
+          <button className="btn btn-ghost btn-sm btn-icon" onClick={() => navigate('/students')}><ArrowLeftIcon size={16} /></button>
           <div>
             <div className="page-title">{student.firstName} {student.lastName}</div>
             <div className="page-subtitle">{student.matricNumber} · {student.department?.name}</div>
           </div>
         </div>
         <div className="page-actions">
-          <button onClick={openEditModal} className="btn btn-ghost btn-sm">✏️ Edit Profile</button>
+          <button onClick={openEditModal} className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><EditIcon size={14} /> Edit Profile</button>
         </div>
       </div>
 
@@ -204,7 +206,7 @@ export default function StudentDetailPage() {
         <div className="grid-2">
           {/* Personal & Custom Details */}
           <div className="section-card">
-            <div className="section-card-header"><div className="section-card-title">📍 Personal & Dynamic Fields</div></div>
+            <div className="section-card-header"><div className="section-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPinIcon size={16} /> Personal & Dynamic Fields</div></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[
                 { label: 'Residential Address', value: student.residentialAddress || '—' },
@@ -232,7 +234,7 @@ export default function StudentDetailPage() {
           </div>
 
           <div className="section-card">
-            <div className="section-card-header"><div className="section-card-title">📄 Admission Documents</div></div>
+            <div className="section-card-header"><div className="section-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FileIcon size={16} /> Admission Documents</div></div>
             {docLinks.length > 0 ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {docLinks.map((doc) => {
@@ -244,7 +246,7 @@ export default function StudentDetailPage() {
                       border: '1px solid var(--border-subtle)'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span>📎</span>
+                        <FileIcon size={14} color="var(--primary-300)" />
                         <div>
                           <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{
                             color: 'var(--primary-200)', fontWeight: 600, fontSize: 13, textDecoration: 'none'
@@ -264,18 +266,18 @@ export default function StudentDetailPage() {
                             <button
                               onClick={() => handleUpdateDocStatus(doc.key, 'VERIFIED')}
                               className="btn btn-gold btn-sm"
-                              style={{ padding: '4px 8px', fontSize: 11 }}
+                              style={{ padding: '4px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                             >
-                              ✓ Verify
+                              <CheckIcon size={12} /> Verify
                             </button>
                           )}
                           {status !== 'REJECTED' && (
                             <button
                               onClick={() => handleUpdateDocStatus(doc.key, 'REJECTED')}
                               className="btn btn-neutral btn-sm"
-                              style={{ padding: '4px 8px', fontSize: 11, color: 'var(--danger-400)' }}
+                              style={{ padding: '4px 8px', fontSize: 11, color: 'var(--danger-400)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                             >
-                              ✕ Reject
+                              <CrossIcon size={12} /> Reject
                             </button>
                           )}
                         </div>
@@ -286,7 +288,7 @@ export default function StudentDetailPage() {
               </div>
             ) : (
               <div className="empty-state" style={{ padding: 32 }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>📂</div>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><FolderIcon size={32} color="var(--text-muted)" /></div>
                 <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>No documents uploaded yet.</div>
               </div>
             )}
@@ -313,7 +315,7 @@ export default function StudentDetailPage() {
                 ))}
               </tbody>
             </table>
-          ) : <div className="empty-state"><div className="empty-state-icon">💳</div><div className="empty-state-title">No payment records</div></div>}
+          ) : <div className="empty-state"><div className="empty-state-icon"><PaymentsIcon size={48} color="#800020" /></div><div className="empty-state-title">No payment records</div></div>}
         </div>
       )}
 
@@ -336,7 +338,7 @@ export default function StudentDetailPage() {
                 </div>
               </div>
             ))
-          ) : <div className="empty-state"><div className="empty-state-icon">📚</div><div className="empty-state-title">No course registrations</div></div>}
+          ) : <div className="empty-state"><div className="empty-state-icon"><AcademicIcon size={48} color="#800020" /></div><div className="empty-state-title">No course registrations</div></div>}
         </div>
       )}
 
@@ -357,7 +359,7 @@ export default function StudentDetailPage() {
                 ))}
               </tbody>
             </table>
-          ) : <div className="empty-state"><div className="empty-state-icon">🏠</div><div className="empty-state-title">No hostel allocation</div></div>}
+          ) : <div className="empty-state"><div className="empty-state-icon"><HostelsIcon size={48} color="#800020" /></div><div className="empty-state-title">No hostel allocation</div></div>}
         </div>
       )}
 
@@ -367,7 +369,7 @@ export default function StudentDetailPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">Edit Student Profile</h3>
-              <button className="modal-close" onClick={() => setShowEditModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowEditModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSaveProfile}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

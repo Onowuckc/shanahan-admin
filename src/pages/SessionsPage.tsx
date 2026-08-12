@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
+import { CalendarIcon, CrossIcon } from '../components/Icons';
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState<any[]>([]);
@@ -83,7 +84,7 @@ export default function SessionsPage() {
 
         {sessions.length === 0 && (
           <div className="empty-state">
-            <div className="empty-state-icon">📅</div>
+            <div className="empty-state-icon"><CalendarIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No academic sessions yet</div>
             <div className="empty-state-desc">Create the first academic session to get started.</div>
           </div>
@@ -95,7 +96,7 @@ export default function SessionsPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title">Add Academic Session</div>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body">
               {error && <div style={{ color: 'var(--danger-500)', fontSize: 13, marginBottom: 12 }}>{error}</div>}

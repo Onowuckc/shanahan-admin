@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/SHANAHAN-UNI-LOGO.png';
+import { AlertIcon } from '../components/Icons';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -50,7 +51,8 @@ export default function LoginPage() {
               alignItems: 'center',
               gap: 8,
             }}>
-              ⚠️ {error}
+              <AlertIcon size={18} color="var(--danger-500)" />
+              <span>{error}</span>
             </div>
           )}
 
@@ -89,7 +91,7 @@ export default function LoginPage() {
             {loading ? (
               <><span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} /> Signing in...</>
             ) : (
-              '🔐 Sign In to Portal'
+              'Sign In to Portal'
             )}
           </button>
         </form>

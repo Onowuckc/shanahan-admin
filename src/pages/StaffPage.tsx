@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { SearchIcon, StaffIcon, TrashIcon, AlertIcon, EditIcon, CrossIcon, UploadIcon } from '../components/Icons';
+
 
 interface Staff {
   id: string;
@@ -180,14 +182,14 @@ export default function StaffPage() {
           </div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost btn-sm" onClick={() => setShowUploadModal(true)}>⬆️ Bulk Import Staff</button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowUploadModal(true)}><UploadIcon size={14} /> Bulk Import Staff</button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="filters-bar">
         <div className="search-input-wrapper" style={{ minWidth: 300 }}>
-          <span>🔍</span>
+          <SearchIcon size={15} color="var(--text-muted)" />
           <input
             placeholder="Search name, staff ID, email..."
             value={search}
@@ -210,7 +212,7 @@ export default function StaffPage() {
           </div>
         ) : staffList.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">👨‍💼</div>
+            <div className="empty-state-icon"><StaffIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No staff members found</div>
           </div>
         ) : (
@@ -259,8 +261,8 @@ export default function StaffPage() {
                   </td>
                   <td style={{ textAlign: 'right' }}>
                     <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => handleEditClick(s)}>✏️ Edit</button>
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-400)' }} onClick={() => { setSelectedStaff(s); setShowDeleteModal(true); }}>🗑️ Delete</button>
+                      <button className="btn btn-ghost btn-sm" onClick={() => handleEditClick(s)}><EditIcon size={14} /><span style={{ marginLeft: 4 }}>Edit</span></button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-400)', display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => { setSelectedStaff(s); setShowDeleteModal(true); }}><TrashIcon size={13} /> Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -276,7 +278,7 @@ export default function StaffPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">Edit Staff Profile</h3>
-              <button className="modal-close" onClick={() => setShowEditModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowEditModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSaveProfile}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -344,7 +346,7 @@ export default function StaffPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">Bulk Import Staff from Excel</h3>
-              <button className="modal-close" onClick={() => { setShowUploadModal(false); setUploadDetails(null); setUploadError(null); }}>✕</button>
+              <button className="modal-close" onClick={() => { setShowUploadModal(false); setUploadDetails(null); setUploadError(null); }}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleUploadSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -374,8 +376,8 @@ export default function StaffPage() {
                 </div>
 
                 {uploadError && (
-                  <div style={{ padding: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid var(--danger-500)', borderRadius: 'var(--radius-md)', color: 'var(--danger-500)', fontSize: 13 }}>
-                    ⚠️ {uploadError}
+                  <div style={{ padding: 12, background: 'rgba(239,68,68,0.1)', border: '1px solid var(--danger-500)', borderRadius: 'var(--radius-md)', color: 'var(--danger-500)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertIcon size={16} /> {uploadError}
                   </div>
                 )}
 
@@ -404,8 +406,8 @@ export default function StaffPage() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
             <div className="modal-header">
-              <h3 className="modal-title" style={{ color: 'var(--danger-400)' }}>⚠️ Confirm Delete Staff Account</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(false)}>✕</button>
+              <h3 className="modal-title" style={{ color: 'var(--danger-400)', display: 'flex', alignItems: 'center', gap: 8 }}><AlertIcon size={20} color="var(--danger-400)" /> Confirm Delete Staff Account</h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div style={{ padding: '12px 0' }}>
               <p style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 12 }}>
@@ -425,13 +427,16 @@ export default function StaffPage() {
                 <div><strong>Staff ID:</strong> {selectedStaff.staffId}</div>
                 <div><strong>Email:</strong> {selectedStaff.user?.email || 'N/A'}</div>
                 <div><strong>Role:</strong> {selectedStaff.user?.role || 'N/A'}</div>
-                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>🚨 Warning: This action cannot be undone and will permanently remove staff login credentials and profile records.</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                  <AlertIcon size={14} color="#f87171" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>Warning: This action cannot be undone and will permanently remove staff login credentials and profile records.</span>
+                </div>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
               <button className="btn btn-ghost" onClick={() => setShowDeleteModal(false)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleDeleteStaff}>
-                🗑️ Delete Staff Account
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrashIcon size={14} /> Delete Staff Account</span>
               </button>
             </div>
           </div>

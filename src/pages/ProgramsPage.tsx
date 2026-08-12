@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { AcademicIcon, EditIcon, SettingsIcon, CrossIcon, PlusIcon } from '../components/Icons';
+
 
 interface Program {
   id: string;
@@ -143,7 +145,7 @@ export default function ProgramsPage() {
           <div className="page-subtitle">Manage degree pathways, academic years, and departments</div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>+ Create Programme</button>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={handleOpenCreate}><PlusIcon size={14} /> Create Programme</button>
         </div>
       </div>
 
@@ -155,7 +157,7 @@ export default function ProgramsPage() {
           </div>
         ) : programs.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📚</div>
+            <div className="empty-state-icon"><AcademicIcon size={48} color="var(--text-muted)" /></div>
             <div className="empty-state-title">No programmes registered</div>
           </div>
         ) : (
@@ -179,8 +181,8 @@ export default function ProgramsPage() {
                   <td><span className="badge badge-neutral">{p.duration} Years</span></td>
                   <td><span className="badge badge-info">{p._count.students} Students</span></td>
                   <td>
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(p)}>✏️ Edit</button>
-                    <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8, color: 'var(--primary-200)' }} onClick={() => handleOpenRules(p)}>⚙️ Elective Rules</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(p)}><EditIcon size={14} /><span style={{ marginLeft: 4 }}>Edit</span></button>
+                    <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8, color: 'var(--primary-200)', display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => handleOpenRules(p)}><SettingsIcon size={14} /> Elective Rules</button>
                   </td>
                 </tr>
               ))}
@@ -195,7 +197,7 @@ export default function ProgramsPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">{editingProgram ? 'Edit Degree Pathway' : 'Create New Degree Pathway'}</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -256,7 +258,7 @@ export default function ProgramsPage() {
           <div className="modal" style={{ maxWidth: 500 }}>
             <div className="modal-header">
               <h3 className="modal-title">Elective Course Rules: {programForRule.name}</h3>
-              <button className="modal-close" onClick={() => setShowRulesModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowRulesModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body" style={{ maxHeight: '70vh', overflowY: 'auto' }}>
               <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 16 }}>

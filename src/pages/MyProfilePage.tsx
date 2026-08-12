@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { UserIcon, LockIcon, SaveIcon, CheckIcon } from '../components/Icons';
 
 export default function MyProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -146,7 +147,9 @@ export default function MyProfilePage() {
               transition: 'all 0.2s',
             }}
           >
-            {tab === 'profile' ? '👤 Personal Info' : '🔐 Security & Password'}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              {tab === 'profile' ? <><UserIcon size={14} /> Personal Info</> : <><LockIcon size={14} /> Security &amp; Password</>}
+            </span>
           </button>
         ))}
       </div>
@@ -235,7 +238,7 @@ export default function MyProfilePage() {
                 disabled={profileLoading}
                 style={{ marginTop: 8 }}
               >
-                {profileLoading ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Saving...</> : '💾 Save Changes'}
+                {profileLoading ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Saving...</> : <><SaveIcon size={14} /><span style={{marginLeft:5}}>Save Changes</span></>}
               </button>
             </form>
           </div>
@@ -288,18 +291,18 @@ export default function MyProfilePage() {
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '12px 16px', marginBottom: 16, fontSize: 12, color: 'var(--text-muted)' }}>
                 <strong style={{ color: 'var(--text-secondary)' }}>Password requirements:</strong>
                 <ul style={{ margin: '6px 0 0 16px', lineHeight: 1.8 }}>
-                  <li style={{ color: pwForm.newPassword.length >= 8 ? 'var(--success-400)' : 'inherit' }}>
-                    {pwForm.newPassword.length >= 8 ? '✅' : '○'} At least 8 characters
-                  </li>
-                  <li style={{ color: /[A-Z]/.test(pwForm.newPassword) ? 'var(--success-400)' : 'inherit' }}>
-                    {/[A-Z]/.test(pwForm.newPassword) ? '✅' : '○'} At least one uppercase letter
-                  </li>
-                  <li style={{ color: /[0-9]/.test(pwForm.newPassword) ? 'var(--success-400)' : 'inherit' }}>
-                    {/[0-9]/.test(pwForm.newPassword) ? '✅' : '○'} At least one number
-                  </li>
-                  <li style={{ color: pwForm.newPassword === pwForm.confirmPassword && pwForm.newPassword ? 'var(--success-400)' : 'inherit' }}>
-                    {pwForm.newPassword === pwForm.confirmPassword && pwForm.newPassword ? '✅' : '○'} Passwords match
-                  </li>
+                    <li style={{ color: pwForm.newPassword.length >= 8 ? 'var(--success-400)' : 'inherit' }}>
+                      {pwForm.newPassword.length >= 8 ? <CheckIcon size={13} color="var(--success-400)" /> : <span style={{ color: 'var(--text-muted)' }}>○</span>} At least 8 characters
+                    </li>
+                    <li style={{ color: /[A-Z]/.test(pwForm.newPassword) ? 'var(--success-400)' : 'inherit' }}>
+                      {/[A-Z]/.test(pwForm.newPassword) ? <CheckIcon size={13} color="var(--success-400)" /> : <span style={{ color: 'var(--text-muted)' }}>○</span>} At least one uppercase letter
+                    </li>
+                    <li style={{ color: /[0-9]/.test(pwForm.newPassword) ? 'var(--success-400)' : 'inherit' }}>
+                      {/[0-9]/.test(pwForm.newPassword) ? <CheckIcon size={13} color="var(--success-400)" /> : <span style={{ color: 'var(--text-muted)' }}>○</span>} At least one number
+                    </li>
+                    <li style={{ color: pwForm.newPassword === pwForm.confirmPassword && pwForm.newPassword ? 'var(--success-400)' : 'inherit' }}>
+                      {pwForm.newPassword === pwForm.confirmPassword && pwForm.newPassword ? <CheckIcon size={13} color="var(--success-400)" /> : <span style={{ color: 'var(--text-muted)' }}>○</span>} Passwords match
+                    </li>
                 </ul>
               </div>
 
@@ -309,7 +312,7 @@ export default function MyProfilePage() {
                 disabled={pwLoading}
                 style={{ width: '100%' }}
               >
-                {pwLoading ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Updating...</> : '🔐 Update Password'}
+                {pwLoading ? <><span className="spinner" style={{ width: 16, height: 16, borderWidth: 2 }} /> Updating...</> : <><LockIcon size={14} /><span style={{marginLeft:5}}>Update Password</span></>}
               </button>
             </form>
           </div>

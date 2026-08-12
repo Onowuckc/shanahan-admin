@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { UserIcon, LockIcon, LogoutIcon, MenuIcon } from './Icons';
 
 interface TopbarProps {
   title: string;
   subtitle?: string;
+  onToggleSidebar?: () => void;
 }
 
-export default function Topbar({ title, subtitle }: TopbarProps) {
+export default function Topbar({ title, subtitle, onToggleSidebar }: TopbarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -39,6 +41,14 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
   return (
     <header className="topbar">
       <div className="topbar-left">
+        <button
+          className="hamburger-btn mobile-only"
+          onClick={onToggleSidebar}
+          aria-label="Toggle navigation menu"
+          style={{ marginRight: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <MenuIcon size={20} />
+        </button>
         <div>
           <div className="topbar-title">{title}</div>
           {subtitle && <div className="topbar-breadcrumb">{subtitle}</div>}
@@ -120,7 +130,8 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                 >
-                  👤 My Profile
+                  <UserIcon size={14} />
+                  <span>My Profile</span>
                 </button>
                 <button
                   onClick={() => { setDropdownOpen(false); navigate('/profile', { state: { forcePasswordChange: false } }); }}
@@ -141,7 +152,8 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--surface-2)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                 >
-                  🔐 Change Password
+                  <LockIcon size={14} />
+                  <span>Change Password</span>
                 </button>
               </div>
 
@@ -165,7 +177,8 @@ export default function Topbar({ title, subtitle }: TopbarProps) {
                   onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(239,68,68,0.1)')}
                   onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
                 >
-                  🚪 Sign Out
+                  <LogoutIcon size={14} />
+                  <span>Sign Out</span>
                 </button>
               </div>
             </div>

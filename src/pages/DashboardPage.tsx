@@ -5,6 +5,15 @@ import {
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import api from '../api/client';
+import {
+  StudentsIcon,
+  StaffIcon,
+  AcademicIcon,
+  FinanceIcon,
+  HostelsIcon,
+  ReportsIcon,
+  PaymentsIcon
+} from '../components/Icons';
 
 interface DashboardData {
   overview: {
@@ -64,60 +73,43 @@ export default function DashboardPage() {
   const charts = data?.charts;
 
   const kpis = [
-    { label: 'Total Students', value: fmtNum(overview?.totalStudents || 0), icon: '🎓', color: '#3d65b5', onClick: () => navigate('/students') },
-    { label: 'Total Staff', value: fmtNum(overview?.totalStaff || 0), icon: '👨‍💼', color: '#8b5cf6', onClick: () => navigate('/staff') },
-    { label: 'Faculties', value: fmtNum(overview?.totalFaculties || 0), icon: '🏛️', color: '#d4a017', onClick: () => navigate('/academic/faculties') },
-    { label: 'Departments', value: fmtNum(overview?.totalDepartments || 0), icon: '📚', color: '#06b6d4', onClick: () => navigate('/academic/faculties') },
-    { label: 'Total Collected', value: fmt(fin?.totalPaid || 0), icon: '💰', color: '#22c55e', onClick: () => navigate('/payments') },
-    { label: 'Outstanding', value: fmt(fin?.totalOutstanding || 0), icon: '⏳', color: '#f59e0b', onClick: () => navigate('/payments') },
-    { label: 'Pending Reg.', value: fmtNum(overview?.pendingRegistrations || 0), icon: '📝', color: '#ef4444', onClick: () => navigate('/academic/registrations') },
-    { label: 'Hostel Pending', value: fmtNum(overview?.pendingHostelAllocations || 0), icon: '🏠', color: '#ec4899', onClick: () => navigate('/hostels') },
+    { label: 'Total Students', value: fmtNum(overview?.totalStudents || 0), icon: <StudentsIcon size={20} />, onClick: () => navigate('/students') },
+    { label: 'Total Staff', value: fmtNum(overview?.totalStaff || 0), icon: <StaffIcon size={20} />, onClick: () => navigate('/staff') },
+    { label: 'Faculties', value: fmtNum(overview?.totalFaculties || 0), icon: <AcademicIcon size={20} />, onClick: () => navigate('/academic/faculties') },
+    { label: 'Departments', value: fmtNum(overview?.totalDepartments || 0), icon: <AcademicIcon size={20} />, onClick: () => navigate('/academic/faculties') },
+    { label: 'Total Collected', value: fmt(fin?.totalPaid || 0), icon: <FinanceIcon size={20} />, onClick: () => navigate('/payments') },
+    { label: 'Outstanding', value: fmt(fin?.totalOutstanding || 0), icon: <FinanceIcon size={20} />, onClick: () => navigate('/payments') },
+    { label: 'Pending Reg.', value: fmtNum(overview?.pendingRegistrations || 0), icon: <ReportsIcon size={20} />, onClick: () => navigate('/academic/registrations') },
+    { label: 'Hostel Pending', value: fmtNum(overview?.pendingHostelAllocations || 0), icon: <HostelsIcon size={20} />, onClick: () => navigate('/hostels') },
   ];
 
   return (
     <div className="animate-fade">
-      {/* Welcome Banner */}
-      <div style={{
-        background: 'linear-gradient(135deg, var(--primary-700), var(--primary-800))',
-        border: '1px solid var(--border-default)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '28px 32px',
-        marginBottom: 28,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 20,
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        <div style={{
-          position: 'absolute', right: -30, top: -30,
-          width: 200, height: 200,
-          background: 'radial-gradient(circle, rgba(212,160,23,0.15), transparent 70%)',
-          borderRadius: '50%',
-        }} />
-        <div>
-          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>
-            Welcome to Shanahan University UMIS 👋
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: 14 }}>
-            University Management Information System — Admin Portal
-          </p>
-        </div>
-        {fin && (
-          <div style={{
-            background: 'rgba(0,0,0,0.25)',
-            borderRadius: 'var(--radius-md)',
-            padding: '16px 24px',
-            textAlign: 'center',
-            flexShrink: 0,
-          }}>
-            <div style={{ fontSize: 32, fontWeight: 800, color: 'var(--accent-300)', lineHeight: 1 }}>
-              {fin.collectionRate}%
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 4 }}>Collection Rate</div>
+      {/* Opus Hero Welcome Banner */}
+      <div className="hero-banner">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+          <div>
+            <h1 className="hero-title">Welcome to Shanahan University UMIS</h1>
+            <p className="hero-subtitle">
+              Centralized University Management Information System Administration & Analytics
+            </p>
           </div>
-        )}
+          {fin && (
+            <div style={{
+              background: 'rgba(0,0,0,0.35)',
+              border: '1px solid var(--border-accent)',
+              borderRadius: 'var(--radius-lg)',
+              padding: '16px 28px',
+              textAlign: 'center',
+              flexShrink: 0,
+            }}>
+              <div style={{ fontSize: 32, fontWeight: 800, color: '#FDE047', lineHeight: 1 }}>
+                {fin.collectionRate}%
+              </div>
+              <div style={{ fontSize: 11, color: '#FCE7F3', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Fee Collection Rate</div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -125,13 +117,15 @@ export default function DashboardPage() {
         {kpis.map((kpi) => (
           <div
             key={kpi.label}
-            className="kpi-card"
-            style={{ '--kpi-color': kpi.color, cursor: 'pointer' } as any}
+            className="stat-card-opus"
+            style={{ cursor: 'pointer', padding: 20 }}
             onClick={kpi.onClick}
           >
-            <div className="kpi-icon" style={{ color: kpi.color }}>{kpi.icon}</div>
-            <div className="kpi-value">{kpi.value}</div>
-            <div className="kpi-label">{kpi.label}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase' }}>{kpi.label}</span>
+              <div className="stat-card-icon" style={{ width: 36, height: 36 }}>{kpi.icon}</div>
+            </div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{kpi.value}</div>
           </div>
         ))}
       </div>
@@ -143,13 +137,13 @@ export default function DashboardPage() {
           <div className="chart-title">Students by Level</div>
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={charts?.studentsByLevel || []}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
               <XAxis dataKey="level" stroke="var(--text-muted)" fontSize={12} />
               <YAxis stroke="var(--text-muted)" fontSize={12} />
               <Tooltip
-                contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border-default)', borderRadius: 8, color: 'var(--text-primary)' }}
+                contentStyle={{ background: '#FFFFFF', border: '1px solid var(--border-default)', borderRadius: 8, color: '#1F1115' }}
               />
-              <Bar dataKey="count" fill="#3d65b5" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#800020" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -225,7 +219,7 @@ export default function DashboardPage() {
           </div>
         ) : (
           <div className="empty-state">
-            <div className="empty-state-icon">💳</div>
+            <div className="empty-state-icon"><PaymentsIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No payment records yet</div>
             <div className="empty-state-desc">Payment records will appear here once students begin paying fees.</div>
           </div>

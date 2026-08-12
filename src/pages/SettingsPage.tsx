@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
+import { CrossIcon } from '../components/Icons';
 
 interface CustomField {
   name: string;
@@ -604,7 +605,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button onClick={() => handleRemoveField('student', f.name)} className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--danger-500)' }}>
-                            ✕
+                            <CrossIcon size={14} />
                           </button>
                         </td>
                       </tr>
@@ -648,7 +649,7 @@ export default function SettingsPage() {
                         </td>
                         <td>
                           <button onClick={() => handleRemoveField('staff', f.name)} className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--danger-500)' }}>
-                            ✕
+                            <CrossIcon size={14} />
                           </button>
                         </td>
                       </tr>
@@ -740,7 +741,7 @@ export default function SettingsPage() {
                       <td>{c.examMax}</td>
                       <td>
                         <button onClick={() => handleDeleteConfigException(c.id!)} className="btn btn-ghost btn-sm btn-icon" style={{ color: 'var(--danger-500)' }}>
-                          ✕
+                          <CrossIcon size={14} />
                         </button>
                       </td>
                     </tr>
@@ -903,16 +904,16 @@ export default function SettingsPage() {
                     ];
 
                     const featureLabels: Record<string, string> = {
-                      students: '👤 Students Directory',
-                      admissions: '📝 Admissions/Applicants',
-                      staff: '💼 Staff & Lecturers',
-                      finance: '💰 Fees & Bursary Payments',
-                      academic_setup: '🏛️ Academic Setup (Faculties/Dept/Programs/Sessions)',
-                      academic_records: '📊 Academic Records (Courses, Course Registrations, Splits)',
-                      hostels: '🏨 Hostel Allocations',
-                      user_management: '🔑 Staff Accounts Management',
-                      settings: '⚙️ System Settings',
-                      audit_logs: '📜 Security Audit Logs'
+                      students: 'Students Directory',
+                      admissions: 'Admissions/Applicants',
+                      staff: 'Staff & Lecturers',
+                      finance: 'Fees & Bursary Payments',
+                      academic_setup: 'Academic Setup (Faculties/Dept/Programs/Sessions)',
+                      academic_records: 'Academic Records (Courses, Course Registrations, Splits)',
+                      hostels: 'Hostel Allocations',
+                      user_management: 'Staff Accounts Management',
+                      settings: 'System Settings',
+                      audit_logs: 'Security Audit Logs'
                     };
 
                     return (
@@ -1012,7 +1013,7 @@ export default function SettingsPage() {
           <div className="modal-content" style={{ maxWidth: 450 }}>
             <div className="modal-header">
               <h3 className="modal-title">Add CA/Exam Split Exception</h3>
-              <button onClick={() => setShowExceptionModal(false)} className="btn-close">✕</button>
+              <button onClick={() => setShowExceptionModal(false)} className="btn-close"><CrossIcon size={14} /></button>
             </div>
             <form onSubmit={handleCreateException} className="login-form">
               <div className="form-group">

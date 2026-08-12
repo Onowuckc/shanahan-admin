@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { BuildingIcon, BedIcon, EditIcon, PlusIcon, CrossIcon } from '../components/Icons';
 
 interface Hostel {
   id: string;
@@ -217,7 +218,7 @@ export default function HostelsPage() {
         </div>
         {activeTab === 'blocks' && canManageHostels && (
           <div className="page-actions">
-            <button className="btn btn-primary btn-sm" onClick={handleOpenHostelCreate}>+ Create Hostel Block</button>
+            <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={handleOpenHostelCreate}><PlusIcon size={14} /> Create Hostel Block</button>
           </div>
         )}
       </div>
@@ -231,13 +232,17 @@ export default function HostelsPage() {
             background: 'none',
             border: 'none',
             borderBottom: activeTab === 'blocks' ? '2px solid var(--primary-500)' : 'none',
-            color: activeTab === 'blocks' ? 'var(--primary-200)' : 'var(--text-secondary)',
+            color: activeTab === 'blocks' ? '#800020' : 'var(--text-secondary)',
             fontWeight: activeTab === 'blocks' ? 700 : 500,
             cursor: 'pointer',
             fontSize: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8
           }}
         >
-          🏨 Hostel Blocks
+          <BuildingIcon size={18} />
+          <span>Hostel Blocks</span>
         </button>
         <button
           onClick={() => setActiveTab('allocations')}
@@ -246,13 +251,17 @@ export default function HostelsPage() {
             background: 'none',
             border: 'none',
             borderBottom: activeTab === 'allocations' ? '2px solid var(--primary-500)' : 'none',
-            color: activeTab === 'allocations' ? 'var(--primary-200)' : 'var(--text-secondary)',
+            color: activeTab === 'allocations' ? '#800020' : 'var(--text-secondary)',
             fontWeight: activeTab === 'allocations' ? 700 : 500,
             cursor: 'pointer',
             fontSize: 14,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 8
           }}
         >
-          🛏️ Allocation Requests
+          <BedIcon size={18} />
+          <span>Allocation Requests</span>
         </button>
       </div>
 
@@ -266,7 +275,7 @@ export default function HostelsPage() {
             </div>
           ) : hostels.length === 0 ? (
             <div className="empty-state">
-              <div className="empty-state-icon">🏨</div>
+              <div className="empty-state-icon"><BuildingIcon size={48} color="#800020" /></div>
               <div className="empty-state-title">No hostels registered</div>
             </div>
           ) : (
@@ -312,8 +321,9 @@ export default function HostelsPage() {
                       <td style={{ color: 'var(--text-muted)', fontSize: 13 }}>{h.description || 'N/A'}</td>
                       {canManageHostels && (
                         <td>
-                          <button className="btn btn-ghost btn-sm" onClick={() => handleOpenHostelEdit(h)}>
-                            ✏️ Edit
+                          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => handleOpenHostelEdit(h)}>
+                            <EditIcon size={14} />
+                            <span>Edit</span>
                           </button>
                         </td>
                       )}
@@ -370,7 +380,7 @@ export default function HostelsPage() {
               </div>
             ) : allocations.length === 0 ? (
               <div className="empty-state">
-                <div className="empty-state-icon">🛏️</div>
+                <div className="empty-state-icon"><BedIcon size={48} color="#800020" /></div>
                 <div className="empty-state-title">No allocation requests found</div>
               </div>
             ) : (
@@ -409,8 +419,9 @@ export default function HostelsPage() {
                       </td>
                       <td style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{alloc.note || <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>N/A</span>}</td>
                       <td>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleOpenAllocateModal(alloc)}>
-                          ✏️ Evaluate
+                        <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => handleOpenAllocateModal(alloc)}>
+                          <EditIcon size={14} />
+                          <span>Evaluate</span>
                         </button>
                       </td>
                     </tr>
@@ -428,7 +439,7 @@ export default function HostelsPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">{editingHostel ? 'Edit Hostel Block' : 'Create Hostel Block'}</h3>
-              <button className="modal-close" onClick={() => setShowHostelModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowHostelModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSaveHostel}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -513,7 +524,7 @@ export default function HostelsPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">Evaluate Bed Request</h3>
-              <button className="modal-close" onClick={() => setShowAllocateModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowAllocateModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleUpdateAllocation}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

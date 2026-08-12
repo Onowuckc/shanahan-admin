@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { DownloadIcon, PaymentsIcon, CheckIcon, ClockIcon, SearchIcon, CrossIcon } from '../components/Icons';
 
 const fmt = (n: number) => n.toLocaleString('en-NG', { style: 'currency', currency: 'NGN', maximumFractionDigits: 0 });
 
@@ -42,7 +43,7 @@ export default function PaymentsPage() {
           <div className="page-subtitle">{meta ? `${meta.total.toLocaleString()} payment records` : 'Loading...'}</div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost btn-sm">📤 Export Excel</button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><DownloadIcon size={14} /><span>Export Excel</span></button>
           <button className="btn btn-primary btn-sm">+ Record Payment</button>
         </div>
       </div>
@@ -51,10 +52,10 @@ export default function PaymentsPage() {
       {stats && (
         <div className="kpi-grid" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Billed', value: fmt(stats.totalDue), icon: '🧾', color: '#3d65b5' },
-            { label: 'Total Collected', value: fmt(stats.totalPaid), icon: '✅', color: '#22c55e' },
-            { label: 'Outstanding', value: fmt(stats.totalOutstanding), icon: '⏳', color: '#f59e0b' },
-            { label: 'Total Records', value: stats.totalRecords?.toLocaleString(), icon: '📋', color: '#8b5cf6' },
+            { label: 'Total Billed', value: fmt(stats.totalDue), icon: <PaymentsIcon size={24} color="#3d65b5" />, color: '#3d65b5' },
+            { label: 'Total Collected', value: fmt(stats.totalPaid), icon: <CheckIcon size={24} color="#22c55e" />, color: '#22c55e' },
+            { label: 'Outstanding', value: fmt(stats.totalOutstanding), icon: <ClockIcon size={24} color="#f59e0b" />, color: '#f59e0b' },
+            { label: 'Total Records', value: stats.totalRecords?.toLocaleString(), icon: <PaymentsIcon size={24} color="#8b5cf6" />, color: '#8b5cf6' },
           ].map((k) => (
             <div key={k.label} className="kpi-card" style={{ '--kpi-color': k.color } as any}>
               <div className="kpi-icon" style={{ color: k.color }}>{k.icon}</div>
@@ -68,7 +69,7 @@ export default function PaymentsPage() {
       {/* Filters bar */}
       <div className="filters-bar">
         <div className="search-input-wrapper">
-          <span style={{ color: 'var(--text-muted)' }}>🔍</span>
+          <SearchIcon size={18} color="var(--text-muted)" />
           <input placeholder="Search student/applicant name, matric, app number..." value={filters.search} onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))} />
         </div>
         <select className="form-control" value={filters.status} onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}>
@@ -87,7 +88,7 @@ export default function PaymentsPage() {
         {loading ? (
           <div style={{ padding: 40, textAlign: 'center' }}><div className="spinner" style={{ margin: '0 auto' }} /></div>
         ) : payments.length === 0 ? (
-          <div className="empty-state"><div className="empty-state-icon">💳</div><div className="empty-state-title">No payments found</div></div>
+          <div className="empty-state"><div className="empty-state-icon"><PaymentsIcon size={48} color="var(--text-muted)" /></div><div className="empty-state-title">No payments found</div></div>
         ) : (
           <table className="data-table">
             <thead>
@@ -159,7 +160,7 @@ export default function PaymentsPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 600, width: '90%' }}>
             <div className="modal-header">
               <h3 className="modal-title">Payment Details & Paystack Audit</h3>
-              <button className="modal-close" onClick={() => setDetailPayment(null)}>✕</button>
+              <button className="modal-close" onClick={() => setDetailPayment(null)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {/* Profile Details */}

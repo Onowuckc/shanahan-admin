@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { SearchIcon, AcademicIcon, EditIcon, CrossIcon, PlusIcon } from '../components/Icons';
+
 
 interface Course {
   id: string;
@@ -155,14 +157,14 @@ export default function CoursesPage() {
           <div className="page-subtitle">Manage departmental courses, assignments, and credit structures</div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreate}>+ Create Course</button>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={handleOpenCreate}><PlusIcon size={14} /> Create Course</button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="filters-bar">
         <div className="search-input-wrapper" style={{ minWidth: 300 }}>
-          <span>🔍</span>
+          <SearchIcon size={15} color="var(--text-muted)" />
           <input
             placeholder="Search code, title..."
             value={search}
@@ -185,7 +187,7 @@ export default function CoursesPage() {
           </div>
         ) : courses.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📖</div>
+            <div className="empty-state-icon"><AcademicIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No courses found</div>
           </div>
         ) : (
@@ -225,7 +227,7 @@ export default function CoursesPage() {
                   </td>
                   <td><span className="badge badge-info">{c._count.registrations} Students</span></td>
                   <td>
-                    <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(c)}>✏️ Edit</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(c)}><EditIcon size={14} /><span style={{ marginLeft: 4 }}>Edit</span></button>
                   </td>
                 </tr>
               ))}
@@ -240,7 +242,7 @@ export default function CoursesPage() {
           <div className="modal">
             <div className="modal-header">
               <h3 className="modal-title">{editingCourse ? 'Edit Course Details' : 'Create New Course'}</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

@@ -1,8 +1,8 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { useState } from 'react';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
-import { useLocation } from 'react-router-dom';
 
 const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Overview & Key Metrics' },
@@ -28,17 +28,23 @@ const PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
 
 export function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   if (!isAuthenticated) return <Navigate to="/login" replace />;
 
   return (
     <div className="app-layout">
-      <Sidebar />
-      <PageLayout />
+      <div
+        className={`sidebar-backdrop ${sidebarOpen ? 'show' : ''}`}
+        onClick={() => setSidebarOpen(false)}
+      />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <PageLayout onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
     </div>
   );
 }
 
-function PageLayout() {
+function PageLayout({ onToggleSidebar }: { onToggleSidebar: () => void }) {
   const location = useLocation();
   const match = Object.entries(PAGE_TITLES).find(([path]) =>
     location.pathname === path || location.pathname.startsWith(path + '/')
@@ -47,7 +53,7 @@ function PageLayout() {
 
   return (
     <>
-      <Topbar title={title} subtitle={subtitle} />
+      <Topbar title={title} subtitle={subtitle} onToggleSidebar={onToggleSidebar} />
       <main className="main-content">
         <Outlet />
       </main>

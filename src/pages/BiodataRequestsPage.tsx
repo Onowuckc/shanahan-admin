@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import api from '../api/client';
+import { StudentsIcon, FileIcon } from '../components/Icons';
 
 interface BiodataRequest {
   id: string;
@@ -144,7 +145,8 @@ export default function BiodataRequestsPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
                     <h3 style={{ fontSize: 16, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      🎓 {req.student.firstName} {req.student.lastName}
+                      <StudentsIcon size={16} color="var(--primary-200)" />
+                      {req.student.firstName} {req.student.lastName}
                       <span style={{ fontSize: 13, color: 'var(--primary-200)', fontWeight: 600 }}>({req.student.matricNumber})</span>
                     </h3>
                     <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
@@ -174,7 +176,7 @@ export default function BiodataRequestsPage() {
                         <div key={key} style={{ fontSize: 13 }}>
                           <span style={{ textTransform: 'capitalize', color: 'var(--text-muted)', fontWeight: 600 }}>{key}: </span>
                           <span style={{ textDecoration: 'line-through', color: '#ef4444', marginRight: 6 }}>{String(currentVal)}</span>
-                          <span style={{ color: '#22c55e', fontWeight: 700 }}>➔ {String(val)}</span>
+                          <span style={{ color: '#22c55e', fontWeight: 700 }}>&rarr; {String(val)}</span>
                         </div>
                       );
                     })}
@@ -189,8 +191,9 @@ export default function BiodataRequestsPage() {
                 {req.documentUrl && (
                   <div style={{ fontSize: 13 }}>
                     <strong>Supporting Document: </strong>
-                    <a href={req.documentUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-200)', textDecoration: 'underline' }}>
-                      🔗 View Uploaded Document / Affidavit
+                    <a href={req.documentUrl} target="_blank" rel="noreferrer" style={{ color: 'var(--primary-200)', textDecoration: 'underline', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <FileIcon size={14} color="var(--primary-200)" />
+                      <span>View Uploaded Document / Affidavit</span>
                     </a>
                   </div>
                 )}

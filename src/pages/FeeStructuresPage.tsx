@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { PaymentsIcon, EditIcon, CrossIcon } from '../components/Icons';
 
 interface FeeStructure {
   id: string;
@@ -244,7 +245,7 @@ export default function FeeStructuresPage() {
           </div>
         ) : structures.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">⚙️</div>
+            <div className="empty-state-icon"><PaymentsIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No fee structures configured</div>
           </div>
         ) : (
@@ -291,8 +292,14 @@ export default function FeeStructuresPage() {
                   </td>
                   <td>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => handleOpenEdit(st)}>✏️ Edit</button>
-                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-500)' }} onClick={() => handleDelete(st.id)}>✕ Delete</button>
+                      <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => handleOpenEdit(st)}>
+                        <EditIcon size={14} />
+                        <span>Edit</span>
+                      </button>
+                      <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-500)', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => handleDelete(st.id)}>
+                        <CrossIcon size={14} color="var(--danger-500)" />
+                        <span>Delete</span>
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -308,7 +315,7 @@ export default function FeeStructuresPage() {
           <div className="modal modal-lg">
             <div className="modal-header">
               <h3 className="modal-title">{editingStructure ? 'Edit Fee Configuration' : 'Configure Fee Allocation'}</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

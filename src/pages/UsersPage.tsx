@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { UsersIcon, RefreshIcon, KeyIcon, RolesIcon, TrashIcon, AlertIcon, ShieldIcon, CheckIcon, EditIcon, CrossIcon, PlusIcon } from '../components/Icons';
+
 
 const ALL_ADMIN_ROLES = [
   'SUPER_ADMIN',
@@ -222,8 +224,8 @@ export default function UsersPage() {
           <div className="page-title">Administrative Users</div>
           <div className="page-subtitle">Manage portal logins for all admin roles: Bursary, Registry, Hostel Admin, ICT, etc.</div>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
-          ＋ Create New User
+        <button className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowCreateModal(true)}>
+          <PlusIcon size={14} /> Create New User
         </button>
       </div>
 
@@ -247,7 +249,10 @@ export default function UsersPage() {
             <option key={r} value={r}>{roleLabel(r)}</option>
           ))}
         </select>
-        <button className="btn btn-ghost" onClick={fetchUsers}>🔄 Refresh</button>
+        <button className="btn btn-ghost" onClick={fetchUsers} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <RefreshIcon size={14} />
+          <span>Refresh</span>
+        </button>
       </div>
 
       {/* Role legend chips */}
@@ -277,7 +282,7 @@ export default function UsersPage() {
           </div>
         ) : users.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">👥</div>
+            <div className="empty-state-icon"><UsersIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No users found</div>
             <div className="empty-state-desc">Try adjusting your search or create a new user.</div>
           </div>
@@ -333,13 +338,13 @@ export default function UsersPage() {
                     </div>
                   </td>
                   <td>
-                    <span className={`badge badge-${u.user.isEmailVerified ? 'success' : 'warning'}`}>
-                      {u.user.isEmailVerified ? '✓ Active' : '⚠ Pending'}
+                    <span className={`badge badge-${u.user.isEmailVerified ? 'success' : 'warning'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {u.user.isEmailVerified ? <><CheckIcon size={12} /> Active</> : <><AlertIcon size={12} /> Pending</>}
                     </span>
                   </td>
                   <td>
-                    <span className={`badge badge-${u.user.isFirstLogin ? 'warning' : 'neutral'}`} style={{ fontSize: 11 }}>
-                      {u.user.isFirstLogin ? '⚠ Must Change PW' : 'No'}
+                    <span className={`badge badge-${u.user.isFirstLogin ? 'warning' : 'neutral'}`} style={{ fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      {u.user.isFirstLogin ? <><AlertIcon size={12} /> Must Change PW</> : 'No'}
                     </span>
                   </td>
                   <td>
@@ -361,7 +366,7 @@ export default function UsersPage() {
                         }}
                         style={{ fontSize: 12 }}
                       >
-                        ✏️ Edit
+                        <EditIcon size={14} /><span style={{ marginLeft: 4 }}>Edit</span>
                       </button>
 
                       {/* Reset password — SUPER_ADMIN or ICT_ADMIN */}
@@ -371,7 +376,7 @@ export default function UsersPage() {
                         onClick={() => { setShowResetModal(u); setResetPassword(''); }}
                         style={{ fontSize: 12 }}
                       >
-                        🔑 Reset PW
+                        <KeyIcon size={13} /> Reset PW
                       </button>
 
                       {/* Change role — SUPER_ADMIN only */}
@@ -382,7 +387,7 @@ export default function UsersPage() {
                           onClick={() => { setShowRoleModal(u); setNewRoles((u.user as any).roles || [u.user.role]); }}
                           style={{ fontSize: 12 }}
                         >
-                          🎭 Roles
+                          <RolesIcon size={13} /> Roles
                         </button>
                       )}
 
@@ -394,7 +399,7 @@ export default function UsersPage() {
                           onClick={() => setShowDeleteModal(u)}
                           style={{ fontSize: 12, color: 'var(--danger-400)' }}
                         >
-                          🗑️ Delete
+                          <TrashIcon size={13} /> Delete
                         </button>
                       )}
                     </div>
@@ -412,7 +417,7 @@ export default function UsersPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
             <div className="modal-header">
               <h3 className="modal-title">Create New Admin User</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowCreateModal(false)}>✕</button>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowCreateModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleCreateUser}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -489,8 +494,9 @@ export default function UsersPage() {
                 </div>
               </div>
 
-              <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 16, fontSize: 12, color: 'var(--text-muted)' }}>
-                🔐 The user's initial password will be set to the value in <code>SEED_DEFAULT_PASSWORD</code> (.env). They will be required to change it on first login.
+              <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', marginBottom: 16, fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                <ShieldIcon size={14} color="var(--text-muted)" style={{ flexShrink: 0, marginTop: 1 }} />
+                <span>The user's initial password will be set to the value in <code>SEED_DEFAULT_PASSWORD</code> (.env). They will be required to change it on first login.</span>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
@@ -510,7 +516,7 @@ export default function UsersPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 420 }}>
             <div className="modal-header">
               <h3 className="modal-title">Force Reset Password</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowResetModal(null)}>✕</button>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowResetModal(null)}><CrossIcon size={16} /></button>
             </div>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
               Resetting password for <strong>{showResetModal.firstName} {showResetModal.lastName}</strong> ({showResetModal.staffId}).
@@ -530,7 +536,7 @@ export default function UsersPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 8 }}>
               <button className="btn btn-ghost" onClick={() => setShowResetModal(null)}>Cancel</button>
               <button className="btn btn-gold" disabled={actionLoading} onClick={handleResetPassword}>
-                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Resetting...</> : '🔑 Reset Password'}
+                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Resetting...</> : <><KeyIcon size={14} /><span style={{marginLeft:4}}>Reset Password</span></>}
               </button>
             </div>
           </div>
@@ -543,7 +549,7 @@ export default function UsersPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 450 }}>
             <div className="modal-header">
               <h3 className="modal-title">Manage System Roles</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowRoleModal(null)}>✕</button>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowRoleModal(null)}><CrossIcon size={16} /></button>
             </div>
             <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 16 }}>
               Configure assigned system roles for <strong>{showRoleModal.firstName} {showRoleModal.lastName}</strong> ({showRoleModal.staffId}).
@@ -586,7 +592,7 @@ export default function UsersPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 18 }}>
               <button className="btn btn-ghost" onClick={() => setShowRoleModal(null)}>Cancel</button>
               <button className="btn btn-primary" disabled={actionLoading || newRoles.length === 0} onClick={handleChangeRole}>
-                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Updating...</> : '🎭 Update Roles'}
+                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Updating...</> : <><RolesIcon size={14} /><span style={{marginLeft:4}}>Update Roles</span></>}
               </button>
             </div>
           </div>
@@ -598,7 +604,7 @@ export default function UsersPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
             <div className="modal-header">
               <h3 className="modal-title">Edit Admin User ({showEditModal.staffId})</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowEditModal(null)}>✕</button>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowEditModal(null)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleEditUser}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -683,8 +689,10 @@ export default function UsersPage() {
         <div className="modal-overlay" onClick={() => setShowDeleteModal(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
             <div className="modal-header">
-              <h3 className="modal-title" style={{ color: 'var(--danger-400)' }}>⚠️ Confirm User Deletion</h3>
-              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(null)}>✕</button>
+              <h3 className="modal-title" style={{ color: 'var(--danger-400)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <AlertIcon size={20} color="var(--danger-400)" /> Confirm User Deletion
+              </h3>
+              <button className="btn btn-ghost btn-icon" onClick={() => setShowDeleteModal(null)}><CrossIcon size={16} /></button>
             </div>
             <div style={{ padding: '12px 0' }}>
               <p style={{ fontSize: 14, color: 'var(--text-primary)', marginBottom: 12 }}>
@@ -704,13 +712,16 @@ export default function UsersPage() {
                 <div><strong>Staff ID:</strong> {showDeleteModal.staffId}</div>
                 <div><strong>Email:</strong> {showDeleteModal.user.email}</div>
                 <div><strong>Role:</strong> {showDeleteModal.user.role}</div>
-                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171' }}>🚨 Warning: This action cannot be undone and will permanently remove all user credentials and associated profiles.</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: '#f87171', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+                  <AlertIcon size={14} color="#f87171" style={{ flexShrink: 0, marginTop: 1 }} />
+                  <span>Warning: This action cannot be undone and will permanently remove all user credentials and associated profiles.</span>
+                </div>
               </div>
             </div>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 16 }}>
               <button className="btn btn-ghost" onClick={() => setShowDeleteModal(null)}>Cancel</button>
               <button className="btn btn-danger" disabled={actionLoading} onClick={handleDeleteUser}>
-                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Deleting...</> : '🗑️ Delete User Account'}
+                {actionLoading ? <><span className="spinner" style={{ width: 14, height: 14, borderWidth: 2 }} /> Deleting...</> : <><TrashIcon size={14} /><span style={{marginLeft:4}}>Delete User Account</span></>}
               </button>
             </div>
           </div>

@@ -1,41 +1,54 @@
 // Placeholder pages for modules to be built out in subsequent phases
 // Each exports a simple page component with the module title and a coming soon card
+import React from 'react';
+import {
+  StaffIcon,
+  ApplicantsIcon,
+  AcademicIcon,
+  HostelsIcon,
+  ReportsIcon,
+  UsersIcon,
+  SettingsIcon,
+  CheckIcon,
+  LockIcon,
+  ClockIcon,
+} from '../components/Icons';
 
 export function StaffPage() {
-  return <PlaceholderPage icon="👨‍💼" title="Staff Management" desc="Manage academic and administrative staff profiles, roles, and course assignments." />;
+  return <PlaceholderPage icon={<StaffIcon size={48} color="#FDE047" />} title="Staff Management" desc="Manage academic and administrative staff profiles, roles, and course assignments." />;
 }
 export function ApplicantsPage() {
-  return <PlaceholderPage icon="📋" title="Applicants" desc="View and manage admission applications, update statuses, and review submitted documents." />;
+  return <PlaceholderPage icon={<ApplicantsIcon size={48} color="#FDE047" />} title="Applicants" desc="View and manage admission applications, update statuses, and review submitted documents." />;
 }
 export function ProgramsPage() {
-  return <PlaceholderPage icon="📚" title="Programmes" desc="Manage degree programmes, durations, and department associations." />;
+  return <PlaceholderPage icon={<AcademicIcon size={48} color="#FDE047" />} title="Programmes" desc="Manage degree programmes, durations, and department associations." />;
 }
 export function CoursesPage() {
-  return <PlaceholderPage icon="📖" title="Courses" desc="Manage the university course catalogue, credit units, and lecturer assignments." />;
+  return <PlaceholderPage icon={<AcademicIcon size={48} color="#FDE047" />} title="Courses" desc="Manage the university course catalogue, credit units, and lecturer assignments." />;
 }
 export function CourseRegistrationsPage() {
-  return <PlaceholderPage icon="✅" title="Course Registrations" desc="Review and approve or reject student course registration requests." />;
+  return <PlaceholderPage icon={<CheckIcon size={48} color="#FDE047" />} title="Course Registrations" desc="Review and approve or reject student course registration requests." />;
 }
 export function FeeStructuresPage() {
-  return <PlaceholderPage icon="⚙️" title="Fee Structures" desc="Configure fee amounts per session, semester, level, faculty, or department." />;
+  return <PlaceholderPage icon={<SettingsIcon size={48} color="#FDE047" />} title="Fee Structures" desc="Configure fee amounts per session, semester, level, faculty, or department." />;
 }
 export function HostelsPage() {
-  return <PlaceholderPage icon="🏠" title="Hostel Management" desc="Manage hostel blocks, capacities, and student allocation requests." />;
+  return <PlaceholderPage icon={<HostelsIcon size={48} color="#FDE047" />} title="Hostel Management" desc="Manage hostel blocks, capacities, and student allocation requests." />;
 }
 export function ReportsPage() {
-  return <PlaceholderPage icon="📈" title="Reports & Analytics" desc="Generate financial and academic reports, export to Excel and PDF." />;
+  return <PlaceholderPage icon={<ReportsIcon size={48} color="#FDE047" />} title="Reports & Analytics" desc="Generate financial and academic reports, export to Excel and PDF." />;
 }
 export function UsersPage() {
-  return <PlaceholderPage icon="👥" title="User Management" desc="Create and manage portal user accounts and role assignments." />;
+  return <PlaceholderPage icon={<UsersIcon size={48} color="#FDE047" />} title="User Management" desc="Create and manage portal user accounts and role assignments." />;
 }
 export function AuditLogsPage() {
-  return <PlaceholderPage icon="🔒" title="Audit Logs" desc="Review all system activity, security events, and admin actions." />;
+  return <PlaceholderPage icon={<LockIcon size={48} color="#FDE047" />} title="Audit Logs" desc="Review all system activity, security events, and admin actions." />;
 }
 export function SettingsPage() {
-  return <PlaceholderPage icon="⚙️" title="Settings" desc="Configure system-wide settings, branding, and university details." />;
+  return <PlaceholderPage icon={<SettingsIcon size={48} color="#FDE047" />} title="Settings" desc="Configure system-wide settings, branding, and university details." />;
 }
 
-function PlaceholderPage({ icon, title, desc }: { icon: string; title: string; desc: string }) {
+function PlaceholderPage({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
   return (
     <div className="animate-fade">
       <div style={{
@@ -52,7 +65,7 @@ function PlaceholderPage({ icon, title, desc }: { icon: string; title: string; d
           background: 'linear-gradient(135deg, var(--primary-700), var(--primary-800))',
           border: '1px solid var(--border-default)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 48, marginBottom: 24,
+          marginBottom: 24,
           boxShadow: 'var(--shadow-md)',
         }}>{icon}</div>
         <h2 style={{ fontSize: 26, fontWeight: 800, marginBottom: 12 }}>{title}</h2>
@@ -66,8 +79,12 @@ function PlaceholderPage({ icon, title, desc }: { icon: string; title: string; d
           fontSize: 13,
           color: 'var(--accent-300)',
           fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 8,
         }}>
-          🚧 This module is in active development — coming in the next phase
+          <ClockIcon size={16} color="var(--accent-300)" />
+          <span>This module is in active development — coming in the next phase</span>
         </div>
       </div>
     </div>

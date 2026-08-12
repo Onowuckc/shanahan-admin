@@ -1,6 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
+import { SearchIcon, StudentsIcon, EyeIcon, CrossIcon, UploadIcon, PlusIcon } from '../components/Icons';
+
 
 interface Student {
   id: string;
@@ -101,15 +103,15 @@ export default function StudentsPage() {
           </div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/students/upload')}>⬆️ Bulk Upload</button>
-          <button className="btn btn-primary btn-sm">+ Add Student</button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => navigate('/students/upload')}><UploadIcon size={14} /> Bulk Upload</button>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlusIcon size={14} /> Add Student</button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="filters-bar">
         <div className="search-input-wrapper" style={{ minWidth: 260 }}>
-          <span style={{ color: 'var(--text-muted)' }}>🔍</span>
+          <SearchIcon size={15} color="var(--text-muted)" />
           <input
             id="student-search"
             placeholder="Search name, matric number, email..."
@@ -144,7 +146,7 @@ export default function StudentsPage() {
         </select>
 
         {Object.values(filters).some(Boolean) && (
-          <button className="btn btn-ghost btn-sm" onClick={clearFilters}>✕ Clear</button>
+          <button className="btn btn-ghost btn-sm" onClick={clearFilters}><CrossIcon size={14} /><span style={{ marginLeft: 4 }}>Clear</span></button>
         )}
       </div>
 
@@ -157,7 +159,7 @@ export default function StudentsPage() {
           </div>
         ) : students.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🎓</div>
+            <div className="empty-state-icon"><StudentsIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No students found</div>
             <div className="empty-state-desc">Try adjusting your search or filter criteria.</div>
           </div>
@@ -210,7 +212,7 @@ export default function StudentsPage() {
                       onClick={(e) => { e.stopPropagation(); navigate(`/students/${s.id}`); }}
                       title="View Details"
                     >
-                      👁
+                      <EyeIcon size={15} />
                     </button>
                   </td>
                 </tr>

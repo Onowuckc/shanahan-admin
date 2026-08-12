@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { SearchIcon, ApplicantsIcon, EyeIcon, CrossIcon } from '../components/Icons';
 
 interface Applicant {
   id: string;
@@ -142,7 +143,7 @@ export default function ApplicantsPage() {
       {/* Filters Bar */}
       <div className="filters-bar" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="search-input-wrapper" style={{ minWidth: 260, flex: '1 1 auto' }}>
-          <span>🔍</span>
+          <SearchIcon size={15} color="var(--text-muted)" />
           <input
             placeholder="Search name, application no, jamb no..."
             value={search}
@@ -194,7 +195,7 @@ export default function ApplicantsPage() {
           </div>
         ) : applicants.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">📋</div>
+            <div className="empty-state-icon"><ApplicantsIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No applicant applications found</div>
           </div>
         ) : (
@@ -233,8 +234,8 @@ export default function ApplicantsPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleOpenDetail(a)}>
-                          👁 Review
+                        <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => handleOpenDetail(a)}>
+                          <EyeIcon size={13} /> Review
                         </button>
                         {a.admissionStatus === 'PENDING' && (
                           <>
@@ -287,7 +288,7 @@ export default function ApplicantsPage() {
           <div className="modal modal-lg">
             <div className="modal-header">
               <h3 className="modal-title">Application Review</h3>
-              <button className="modal-close" onClick={() => setShowModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>

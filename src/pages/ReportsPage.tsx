@@ -84,7 +84,7 @@ export default function ReportsPage() {
                   <div style={{ fontWeight: 600, fontSize: 14 }}>Student Enrolment List</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>All registered student profiles</div>
                 </div>
-                <button className="btn btn-gold btn-sm" onClick={() => handleExport('Students')}>📥 CSV</button>
+                <button className="btn btn-gold btn-sm" style={{ fontWeight: 700, color: '#4A0E17' }} onClick={() => handleExport('Students')}>Export CSV</button>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
@@ -92,7 +92,7 @@ export default function ReportsPage() {
                   <div style={{ fontWeight: 600, fontSize: 14 }}>Financial Receipts Ledger</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Tuition and hostel fee receipts</div>
                 </div>
-                <button className="btn btn-gold btn-sm" onClick={() => handleExport('Finance')}>📥 CSV</button>
+                <button className="btn btn-gold btn-sm" style={{ fontWeight: 700, color: '#4A0E17' }} onClick={() => handleExport('Finance')}>Export CSV</button>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, border: '1px solid var(--border-default)', borderRadius: 'var(--radius-md)' }}>
@@ -100,7 +100,7 @@ export default function ReportsPage() {
                   <div style={{ fontWeight: 600, fontSize: 14 }}>Staff Register</div>
                   <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Lecturers & admin staff listings</div>
                 </div>
-                <button className="btn btn-gold btn-sm" onClick={() => handleExport('Staff')}>📥 CSV</button>
+                <button className="btn btn-gold btn-sm" style={{ fontWeight: 700, color: '#4A0E17' }} onClick={() => handleExport('Staff')}>Export CSV</button>
               </div>
             </div>
           </div>

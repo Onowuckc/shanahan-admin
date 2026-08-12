@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
+import { EyeIcon, CheckIcon, CrossIcon } from '../components/Icons';
 
 interface Registration {
   id: string;
@@ -97,7 +98,7 @@ export default function CourseRegistrationsPage() {
           </div>
         ) : registrations.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">✅</div>
+            <div className="empty-state-icon"><CheckIcon size={48} color="var(--success-500)" /></div>
             <div className="empty-state-title">No registrations found</div>
           </div>
         ) : (
@@ -135,7 +136,7 @@ export default function CourseRegistrationsPage() {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => handleOpenDetail(r)}>👁 Details</button>
+                        <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => handleOpenDetail(r)}><EyeIcon size={13} /> Details</button>
                         {r.isApproved ? (
                           <button className="btn btn-ghost btn-sm" style={{ color: 'var(--danger-500)' }} onClick={() => handleToggleApproval(r, false)}>Reject</button>
                         ) : (
@@ -162,7 +163,7 @@ export default function CourseRegistrationsPage() {
                   {selectedReg.student.firstName} {selectedReg.student.lastName} ({selectedReg.student.matricNumber})
                 </div>
               </div>
-              <button className="modal-close" onClick={() => setShowDetailModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowDetailModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body">
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>

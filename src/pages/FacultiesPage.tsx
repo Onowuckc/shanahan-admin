@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client';
+import { BuildingIcon, EditIcon, SettingsIcon, CrossIcon, PlusIcon } from '../components/Icons';
+
 
 interface Faculty {
   id: string;
@@ -180,8 +182,8 @@ export default function FacultiesPage() {
           <div className="page-subtitle">{faculties.length} faculties · {departments.length} departments</div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost btn-sm" onClick={() => { setShowDeptModal(true); setError(''); }}>+ New Department</button>
-          <button className="btn btn-primary btn-sm" onClick={handleOpenCreateFaculty}>+ New Faculty</button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => { setShowDeptModal(true); setError(''); }}><PlusIcon size={14} /> New Department</button>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={handleOpenCreateFaculty}><PlusIcon size={14} /> New Faculty</button>
         </div>
       </div>
 
@@ -209,16 +211,16 @@ export default function FacultiesPage() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenEditFaculty(f);
-                      }}
-                      className="btn btn-ghost btn-sm"
-                      style={{ padding: '2px 6px', fontSize: 11 }}
-                    >
-                      ✏️ Edit
-                    </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditFaculty(f);
+                        }}
+                        className="btn btn-ghost btn-sm"
+                        style={{ padding: '2px 6px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
+                      >
+                        <EditIcon size={13} /> Edit
+                      </button>
                     <span className="badge badge-info">{f._count.departments} dept{f._count.departments !== 1 ? 's' : ''}</span>
                   </div>
                 </div>
@@ -231,7 +233,7 @@ export default function FacultiesPage() {
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: 12 }}>
             Departments {selectedFaculty ? `(filtered: ${filteredDepts.length})` : `(${departments.length})`}
-            {selectedFaculty && <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8 }} onClick={() => setSelectedFaculty(null)}>✕ Clear</button>}
+            {selectedFaculty && <button className="btn btn-ghost btn-sm" style={{ marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 4 }} onClick={() => setSelectedFaculty(null)}><CrossIcon size={12} /> Clear</button>}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {filteredDepts.map((d) => (
@@ -246,9 +248,9 @@ export default function FacultiesPage() {
                     <button 
                       onClick={() => handleOpenMaxUnits(d)}
                       className="btn btn-ghost btn-sm" 
-                      style={{ fontSize: 11, padding: '2px 8px' }}
+                      style={{ fontSize: 11, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4 }}
                     >
-                      ⚙️ Set Max Units
+                      <SettingsIcon size={13} /> Set Max Units
                     </button>
                   </div>
                 </div>
@@ -265,7 +267,7 @@ export default function FacultiesPage() {
             ))}
             {filteredDepts.length === 0 && (
               <div className="empty-state" style={{ padding: 40 }}>
-                <div className="empty-state-icon">🏛️</div>
+                <div className="empty-state-icon"><BuildingIcon size={48} color="#800020" /></div>
                 <div className="empty-state-title">No departments found</div>
               </div>
             )}
@@ -279,7 +281,7 @@ export default function FacultiesPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title">{editingFaculty ? 'Edit Faculty' : 'Add New Faculty'}</div>
-              <button className="modal-close" onClick={() => setShowFacultyModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowFacultyModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {error && <div style={{ color: 'var(--danger-500)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
@@ -319,7 +321,7 @@ export default function FacultiesPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title">Add New Department</div>
-              <button className="modal-close" onClick={() => setShowDeptModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowDeptModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body">
               {error && <div style={{ color: 'var(--danger-500)', fontSize: 13, marginBottom: 12 }}>{error}</div>}
@@ -353,7 +355,7 @@ export default function FacultiesPage() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title">Set Maximum Credit Units</div>
-              <button className="modal-close" onClick={() => setShowMaxUnitsModal(false)}>✕</button>
+              <button className="modal-close" onClick={() => setShowMaxUnitsModal(false)}><CrossIcon size={16} /></button>
             </div>
             <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
