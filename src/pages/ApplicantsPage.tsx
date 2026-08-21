@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
-import { SearchIcon, ApplicantsIcon, EyeIcon, CrossIcon } from '../components/Icons';
+import { SearchIcon, ApplicantsIcon, EyeIcon, CrossIcon, StudentsIcon, TrashIcon } from '../components/Icons';
 
 interface Applicant {
   id: string;
@@ -120,7 +120,7 @@ export default function ApplicantsPage() {
       const { data } = await api.post(`/admin/applicants/${id}/enrol`);
       const creds = data.credentials || {};
       alert(
-        `🎉 Applicant Enrolled Successfully!\n\n` +
+        `Applicant Enrolled Successfully!\n\n` +
         `Matriculation Number: ${creds.matricNumber || data.data.matricNumber}\n` +
         `Institutional Email: ${creds.generatedEmail || creds.email}\n` +
         `Temporary Password: ${creds.temporaryPassword}\n\n` +
@@ -379,11 +379,11 @@ export default function ApplicantsPage() {
                     {selectedApplicant.admissionStatus === 'ADMITTED' && (
                       <button
                         className="btn btn-primary"
-                        style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', color: '#fff' }}
+                        style={{ backgroundColor: '#16a34a', borderColor: '#16a34a', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                         disabled={savingStatus}
                         onClick={() => handleEnrolApplicant(selectedApplicant.id)}
                       >
-                        🎓 Enrol as Student
+                        <StudentsIcon size={16} /> Enrol as Student
                       </button>
                     )}
                     {selectedApplicant.admissionStatus !== 'ADMITTED' && (
@@ -416,11 +416,11 @@ export default function ApplicantsPage() {
                     )}
                     <button
                       className="btn btn-ghost"
-                      style={{ color: '#ef4444', border: '1px solid #ef4444' }}
+                      style={{ color: '#ef4444', border: '1px solid #ef4444', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                       disabled={savingStatus}
                       onClick={() => handleDeleteApplicant(selectedApplicant)}
                     >
-                      🗑️ Delete Application
+                      <TrashIcon size={16} /> Delete Application
                     </button>
                   </div>
                 </div>

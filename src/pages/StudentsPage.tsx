@@ -113,7 +113,7 @@ export default function StudentsPage() {
       const { data } = await api.post('/admin/students', addForm);
       const creds = data.credentials || {};
       alert(
-        `🎉 Student Account Created Successfully!\n\n` +
+        `Student Account Created Successfully!\n\n` +
         `Matriculation Number: ${creds.matricNumber}\n` +
         `Institutional Email: ${creds.email}\n` +
         `Temporary Password: ${creds.temporaryPassword}\n\n` +
