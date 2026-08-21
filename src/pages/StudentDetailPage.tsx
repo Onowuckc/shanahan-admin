@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { MapPinIcon, FileIcon, FolderIcon, PaymentsIcon, AcademicIcon, HostelsIcon, EditIcon, CheckIcon, CrossIcon, ArrowLeftIcon } from '../components/Icons';
+import { FileIcon, FolderIcon, PaymentsIcon, AcademicIcon, HostelsIcon, EditIcon, CheckIcon, CrossIcon, ArrowLeftIcon, TrashIcon, AlertIcon } from '../components/Icons';
 
 
 interface CustomField {
@@ -18,31 +18,48 @@ export default function StudentDetailPage() {
   const navigate = useNavigate();
   const { user: currentUser } = useAuth();
   const [student, setStudent] = useState<any>(null);
+  const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [programs, setPrograms] = useState<{ id: string; name: string; departmentId: string }[]>([]);
   const [customFields, setCustomFields] = useState<CustomField[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'payments' | 'courses' | 'hostel'>('profile');
 
   // Edit modal states
   const [showEditModal, setShowEditModal] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
     phoneNumber: '',
+    gender: 'MALE',
     level: 100,
+    departmentId: '',
+    programId: '',
     admissionStatus: 'ADMITTED',
     modeOfEntry: 'UTME',
     programType: 'Full-Time'
   });
   const [editMetadata, setEditMetadata] = useState<Record<string, any>>({});
 
+  // Delete modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     Promise.all([
       api.get(`/admin/students/${id}`),
-      api.get('/admin/settings/custom-fields?key=custom_student_fields')
+      api.get('/admin/settings/custom-fields?key=custom_student_fields'),
+      api.get('/admin/departments'),
+      api.get('/admin/programs')
     ])
-      .then(([studentRes, fieldsRes]) => {
+      .then(([studentRes, fieldsRes, deptRes, progRes]) => {
         setStudent(studentRes.data.data);
         setCustomFields(fieldsRes.data.data || []);
+        setDepartments(deptRes.data.data || []);
+        setPrograms(progRes.data.data || []);
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -66,8 +83,14 @@ export default function StudentDetailPage() {
 
   const openEditModal = () => {
     setEditForm({
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      email: student.user?.email || '',
       phoneNumber: student.phoneNumber || '',
+      gender: student.gender || 'MALE',
       level: student.level || 100,
+      departmentId: student.departmentId || student.department?.id || '',
+      programId: student.programId || student.program?.id || '',
       admissionStatus: student.admissionStatus || 'ADMITTED',
       modeOfEntry: student.modeOfEntry || 'UTME',
       programType: student.programType || 'Full-Time'
@@ -78,6 +101,7 @@ export default function StudentDetailPage() {
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
       const payload = {
         ...editForm,
@@ -86,9 +110,26 @@ export default function StudentDetailPage() {
       const response = await api.put(`/admin/students/${student.id}`, payload);
       setStudent(response.data.data);
       setShowEditModal(false);
-    } catch (err) {
+      alert('Student record updated successfully.');
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to update student profile.');
+      alert(err.response?.data?.error || 'Failed to update student profile.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteStudent = async () => {
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/students/${student.id}`);
+      alert(`Student account (${student.matricNumber}) permanently deleted.`);
+      navigate('/students');
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to delete student account.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -126,9 +167,13 @@ export default function StudentDetailPage() {
             <div className="page-title">{student.firstName} {student.lastName}</div>
             <div className="page-subtitle">{student.matricNumber} · {student.department?.name}</div>
           </div>
-        </div>
-        <div className="page-actions">
-          <button onClick={openEditModal} className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><EditIcon size={14} /> Edit Profile</button>
+        </div>        <div className="page-actions" style={{ display: 'flex', gap: 8 }}>
+          <button onClick={openEditModal} className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <EditIcon size={14} color="var(--primary-300)" /> Edit Record
+          </button>
+          <button onClick={() => setShowDeleteModal(true)} className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: 'var(--danger-500)' }}>
+            <TrashIcon size={14} color="var(--danger-500)" /> Delete Account
+          </button>
         </div>
       </div>
 
@@ -178,118 +223,99 @@ export default function StudentDetailPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: 'var(--bg-card)', border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-lg)', padding: 6 }}>
-        {(['profile', 'payments', 'courses', 'hostel'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              flex: 1,
-              padding: '9px 16px',
-              borderRadius: 'var(--radius-md)',
-              border: 'none',
-              background: activeTab === tab ? 'var(--primary-500)' : 'transparent',
-              color: activeTab === tab ? '#fff' : 'var(--text-secondary)',
-              fontWeight: 600,
-              fontSize: 13,
-              cursor: 'pointer',
-              transition: 'all var(--transition)',
-              textTransform: 'capitalize',
-            }}
-          >{tab === 'courses' ? 'Course Registrations' : tab.charAt(0).toUpperCase() + tab.slice(1)}</button>
-        ))}
+      {/* Tabs Navigation */}
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border-subtle)', marginBottom: 20 }}>
+        {[
+          { id: 'profile', label: 'Student Profile & Verification', icon: FolderIcon },
+          { id: 'payments', label: 'Payment History', icon: PaymentsIcon },
+          { id: 'courses', label: 'Course Registrations', icon: AcademicIcon },
+          { id: 'hostel', label: 'Hostel Accommodation', icon: HostelsIcon },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '10px 16px',
+                border: 'none',
+                background: 'none',
+                borderBottom: isActive ? '2px solid var(--primary-400)' : '2px solid transparent',
+                color: isActive ? 'var(--primary-400)' : 'var(--text-muted)',
+                fontWeight: isActive ? 700 : 500,
+                fontSize: 14,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Icon size={16} color={isActive ? 'var(--primary-400)' : 'var(--text-muted)'} />
+              {tab.label}
+            </button>
+          );
+        })}
       </div>
 
-      {/* Tab Content */}
+      {/* Tab Contents */}
       {activeTab === 'profile' && (
-        <div className="grid-2">
-          {/* Personal & Custom Details */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          {/* Documents verification */}
           <div className="section-card">
-            <div className="section-card-header"><div className="section-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><MapPinIcon size={16} /> Personal & Dynamic Fields</div></div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                { label: 'Residential Address', value: student.residentialAddress || '—' },
-                { label: 'State', value: student.state || '—' },
-                { label: 'LGA', value: student.lga || '—' },
-                { label: 'Country', value: student.country || 'Nigeria' },
-                { label: 'Programme Type', value: student.programType || '—' },
-              ].map((f) => (
-                <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{f.label}</span>
-                  <span style={{ fontSize: 13, fontWeight: 500 }}>{f.value}</span>
-                </div>
-              ))}
-
-              {/* Dynamic Metadata Fields */}
-              {customFields.map((field) => (
-                <div key={field.name} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{field.label}</span>
-                  <span style={{ fontSize: 13, fontWeight: 500, fontFamily: field.type === 'number' ? 'monospace' : 'inherit' }}>
-                    {student.metadata?.[field.name] || '—'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="section-card">
-            <div className="section-card-header"><div className="section-card-title" style={{ display: 'flex', alignItems: 'center', gap: 6 }}><FileIcon size={16} /> Admission Documents</div></div>
-            {docLinks.length > 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FileIcon size={18} color="var(--primary-400)" />
+              Document Verifications
+            </h3>
+            {docLinks.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No documents uploaded by student yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {docLinks.map((doc) => {
-                  const status = student.docVerificationStatus?.[doc.key] || 'PENDING';
+                  const status = (student.docVerificationStatus && student.docVerificationStatus[doc.key]) || 'PENDING';
                   return (
-                    <div key={doc.key} style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px',
-                      background: 'var(--bg-input)', borderRadius: 'var(--radius-md)',
-                      border: '1px solid var(--border-subtle)'
-                    }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <FileIcon size={14} color="var(--primary-300)" />
-                        <div>
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{
-                            color: 'var(--primary-200)', fontWeight: 600, fontSize: 13, textDecoration: 'none'
-                          }}>
-                            {doc.label}
-                          </a>
-                          <div style={{ marginTop: 4 }}>
-                            <span className={`badge badge-${status === 'VERIFIED' ? 'success' : status === 'REJECTED' ? 'danger' : 'warning'}`} style={{ fontSize: 10, padding: '2px 6px' }}>
-                              {status}
-                            </span>
-                          </div>
-                        </div>
+                    <div key={doc.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border-subtle)' }}>
+                      <div>
+                        <div style={{ fontWeight: 600, fontSize: 14 }}>{doc.label}</div>
+                        <a href={doc.url} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: 'var(--primary-300)', textDecoration: 'underline' }}>View Document</a>
                       </div>
-                      {canVerifyDocs && (
-                        <div style={{ display: 'flex', gap: 8 }}>
-                          {status !== 'VERIFIED' && (
-                            <button
-                              onClick={() => handleUpdateDocStatus(doc.key, 'VERIFIED')}
-                              className="btn btn-gold btn-sm"
-                              style={{ padding: '4px 8px', fontSize: 11, display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                            >
-                              <CheckIcon size={12} /> Verify
-                            </button>
-                          )}
-                          {status !== 'REJECTED' && (
-                            <button
-                              onClick={() => handleUpdateDocStatus(doc.key, 'REJECTED')}
-                              className="btn btn-neutral btn-sm"
-                              style={{ padding: '4px 8px', fontSize: 11, color: 'var(--danger-400)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
-                            >
-                              <CrossIcon size={12} /> Reject
-                            </button>
-                          )}
-                        </div>
-                      )}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span className={`badge badge-${status === 'VERIFIED' ? 'success' : status === 'REJECTED' ? 'danger' : 'warning'}`}>{status}</span>
+                        {canVerifyDocs && (
+                          <div style={{ display: 'flex', gap: 4 }}>
+                            {status !== 'VERIFIED' && (
+                              <button onClick={() => handleUpdateDocStatus(doc.key, 'VERIFIED')} className="btn btn-ghost btn-sm btn-icon" title="Approve Document"><CheckIcon size={14} color="var(--success-500)" /></button>
+                            )}
+                            {status !== 'REJECTED' && (
+                              <button onClick={() => handleUpdateDocStatus(doc.key, 'REJECTED')} className="btn btn-ghost btn-sm btn-icon" title="Reject Document"><CrossIcon size={14} color="var(--danger-500)" /></button>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   );
                 })}
               </div>
+            )}
+          </div>
+
+          {/* Dynamic Custom Metadata */}
+          <div className="section-card">
+            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FolderIcon size={18} color="var(--primary-400)" />
+              Custom Records & Attributes
+            </h3>
+            {customFields.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No custom student fields configured.</p>
             ) : (
-              <div className="empty-state" style={{ padding: 32 }}>
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><FolderIcon size={32} color="var(--text-muted)" /></div>
-                <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>No documents uploaded yet.</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {customFields.map((field) => (
+                  <div key={field.name} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px dashed var(--border-subtle)' }}>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{field.label}:</span>
+                    <span style={{ fontSize: 13, fontWeight: 600 }}>{student.metadata?.[field.name] || '—'}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -297,131 +323,252 @@ export default function StudentDetailPage() {
       )}
 
       {activeTab === 'payments' && (
-        <div className="table-wrapper">
-          {student.payments?.length > 0 ? (
+        <div className="section-card">
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Student Payment Ledger</h3>
+          {(!student.payments || student.payments.length === 0) ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No payments recorded for this student.</p>
+          ) : (
             <table className="data-table">
-              <thead><tr><th>Session</th><th>Semester</th><th>Amount Due</th><th>Amount Paid</th><th>Outstanding</th><th>Status</th><th>Date</th></tr></thead>
+              <thead>
+                <tr>
+                  <th>Transaction Ref</th>
+                  <th>Fee Category</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
               <tbody>
                 {student.payments.map((p: any) => (
                   <tr key={p.id}>
-                    <td>{p.session?.name}</td>
-                    <td>{p.semester?.name}</td>
-                    <td style={{ fontWeight: 600 }}>{fmt(p.amountDue)}</td>
-                    <td style={{ color: 'var(--success-500)', fontWeight: 600 }}>{fmt(p.amountPaid)}</td>
-                    <td style={{ color: p.amountDue - p.amountPaid > 0 ? 'var(--danger-500)' : 'var(--text-muted)', fontWeight: 600 }}>{fmt(p.amountDue - p.amountPaid)}</td>
-                    <td><span className={`badge badge-${p.status === 'COMPLETED' ? 'success' : p.status === 'PARTIAL' ? 'warning' : 'danger'}`}>{p.status}</span></td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{p.paymentDate ? new Date(p.paymentDate).toLocaleDateString() : '—'}</td>
+                    <td><code style={{ fontSize: 12 }}>{p.txRef || p.id}</code></td>
+                    <td>{p.feeStructure?.category?.name || 'Tuition Fee'}</td>
+                    <td style={{ fontWeight: 600 }}>{fmt(p.amount)}</td>
+                    <td><span className={`badge badge-${p.status === 'COMPLETED' ? 'success' : 'warning'}`}>{p.status}</span></td>
+                    <td>{new Date(p.createdAt).toLocaleDateString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          ) : <div className="empty-state"><div className="empty-state-icon"><PaymentsIcon size={48} color="#800020" /></div><div className="empty-state-title">No payment records</div></div>}
+          )}
         </div>
       )}
 
       {activeTab === 'courses' && (
-        <div className="table-wrapper">
-          {student.registrations?.length > 0 ? (
-            student.registrations.map((reg: any) => (
-              <div key={reg.id} style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <div style={{ fontWeight: 700 }}>{reg.session?.name} — {reg.semester?.name} Semester ({reg.level}L)</div>
-                  <span className={`badge badge-${reg.isApproved ? 'success' : 'warning'}`}>{reg.isApproved ? 'Approved' : 'Pending Approval'}</span>
+        <div className="section-card">
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Course Registration History</h3>
+          {(!student.courseRegistrations || student.courseRegistrations.length === 0) ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No course registrations found.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {student.courseRegistrations.map((reg: any) => (
+                <div key={reg.id} style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)', padding: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <strong>{reg.session?.name} — {reg.semester?.name} ({reg.level}L)</strong>
+                    <span className={`badge badge-${reg.isApproved ? 'success' : 'warning'}`}>{reg.isApproved ? 'Approved' : 'Pending Approval'}</span>
+                  </div>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Units</th>
+                        <th>Grade</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {reg.courses?.map((c: any) => (
+                        <tr key={c.id}>
+                          <td><code>{c.course?.code}</code></td>
+                          <td>{c.course?.title}</td>
+                          <td>{c.course?.creditUnits}</td>
+                          <td>{c.grade || '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {reg.courses?.map((rc: any) => (
-                    <div key={rc.id} style={{ background: 'var(--bg-input)', padding: '6px 12px', borderRadius: 'var(--radius-sm)', fontSize: 13 }}>
-                      <strong>{rc.course?.code}</strong> — {rc.course?.title}
-                      {rc.grade && <span className="badge badge-success" style={{ marginLeft: 6 }}>{rc.grade}</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : <div className="empty-state"><div className="empty-state-icon"><AcademicIcon size={48} color="#800020" /></div><div className="empty-state-title">No course registrations</div></div>}
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {activeTab === 'hostel' && (
-        <div className="table-wrapper">
-          {student.hostelAllocations?.length > 0 ? (
-            <table className="data-table">
-              <thead><tr><th>Hostel</th><th>Session</th><th>Status</th><th>Allocated</th><th>Approved</th></tr></thead>
-              <tbody>
-                {student.hostelAllocations.map((h: any) => (
-                  <tr key={h.id}>
-                    <td style={{ fontWeight: 600 }}>{h.hostel?.name}</td>
-                    <td>{h.session?.name}</td>
-                    <td><span className={`badge badge-${h.status === 'APPROVED' ? 'success' : h.status === 'REJECTED' ? 'danger' : 'warning'}`}>{h.status}</span></td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{new Date(h.allocatedAt).toLocaleDateString()}</td>
-                    <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{h.approvedAt ? new Date(h.approvedAt).toLocaleDateString() : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : <div className="empty-state"><div className="empty-state-icon"><HostelsIcon size={48} color="#800020" /></div><div className="empty-state-title">No hostel allocation</div></div>}
+        <div className="section-card">
+          <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16 }}>Hostel Allocation Details</h3>
+          {(!student.hostelAllocations || student.hostelAllocations.length === 0) ? (
+            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No active hostel room allocations.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {student.hostelAllocations.map((h: any) => (
+                <div key={h.id} style={{ padding: 14, borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)', background: 'rgba(255,255,255,0.02)' }}>
+                  <div><strong>Hostel Block:</strong> {h.room?.hostel?.name || 'N/A'}</div>
+                  <div><strong>Room Number:</strong> {h.room?.roomNumber || 'N/A'}</div>
+                  <div><strong>Status:</strong> <span className="badge badge-success">{h.status}</span></div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Profile Edit Modal */}
+      {/* Edit Student Modal */}
       {showEditModal && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 680, width: '100%' }}>
             <div className="modal-header">
-              <h3 className="modal-title">Edit Student Profile</h3>
-              <button className="modal-close" onClick={() => setShowEditModal(false)}><CrossIcon size={16} /></button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <EditIcon size={18} color="var(--primary-300)" />
+                <h3 style={{ margin: 0 }}>Edit Student Record</h3>
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowEditModal(false)}><CrossIcon size={16} /></button>
             </div>
             <form onSubmit={handleSaveProfile}>
-              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div className="form-group">
-                  <label className="form-label">Phone Number</label>
-                  <input
-                    className="form-control"
-                    value={editForm.phoneNumber}
-                    onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
-                  />
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ padding: '8px 12px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Matriculation Number: </span>
+                  <strong style={{ fontFamily: 'monospace', color: 'var(--primary-200)' }}>{student.matricNumber}</strong>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Level</label>
-                  <select className="form-control" value={editForm.level} onChange={(e) => setEditForm({ ...editForm, level: parseInt(e.target.value) })}>
-                    <option value="100">100L</option>
-                    <option value="200">200L</option>
-                    <option value="300">300L</option>
-                    <option value="400">400L</option>
-                    <option value="500">500L</option>
-                    <option value="600">600L</option>
-                  </select>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>First Name *</label>
+                    <input
+                      className="form-control"
+                      required
+                      value={editForm.firstName}
+                      onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Last Name *</label>
+                    <input
+                      className="form-control"
+                      required
+                      value={editForm.lastName}
+                      onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Admission Status</label>
-                  <select className="form-control" value={editForm.admissionStatus} onChange={(e) => setEditForm({ ...editForm, admissionStatus: e.target.value })}>
-                    <option value="ADMITTED">ADMITTED</option>
-                    <option value="PENDING">PENDING</option>
-                    <option value="REJECTED">REJECTED</option>
-                    <option value="WITHDRAWN">WITHDRAWN</option>
-                  </select>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Email Address</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Phone Number</label>
+                    <input
+                      className="form-control"
+                      value={editForm.phoneNumber}
+                      onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Mode of Entry</label>
-                  <select className="form-control" value={editForm.modeOfEntry} onChange={(e) => setEditForm({ ...editForm, modeOfEntry: e.target.value })}>
-                    <option value="UTME">UTME</option>
-                    <option value="DIRECT_ENTRY">DIRECT ENTRY</option>
-                    <option value="TRANSFER">TRANSFER</option>
-                    <option value="POSTGRADUATE">POSTGRADUATE</option>
-                  </select>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Department</label>
+                    <select
+                      className="form-control"
+                      value={editForm.departmentId}
+                      onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Programme</label>
+                    <select
+                      className="form-control"
+                      value={editForm.programId}
+                      onChange={(e) => setEditForm({ ...editForm, programId: e.target.value })}
+                    >
+                      <option value="">Select Programme</option>
+                      {(editForm.departmentId ? programs.filter(p => p.departmentId === editForm.departmentId) : programs).map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
-                <div className="form-group">
-                  <label className="form-label">Programme Type</label>
-                  <input
-                    className="form-control"
-                    placeholder="e.g. Full-Time, Part-Time"
-                    value={editForm.programType}
-                    onChange={(e) => setEditForm({ ...editForm, programType: e.target.value })}
-                  />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Academic Level</label>
+                    <select
+                      className="form-control"
+                      value={editForm.level}
+                      onChange={(e) => setEditForm({ ...editForm, level: parseInt(e.target.value) })}
+                    >
+                      <option value={100}>100 Level</option>
+                      <option value={200}>200 Level</option>
+                      <option value={300}>300 Level</option>
+                      <option value={400}>400 Level</option>
+                      <option value={500}>500 Level</option>
+                      <option value={600}>600 Level</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Gender</label>
+                    <select
+                      className="form-control"
+                      value={editForm.gender}
+                      onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Admission Status</label>
+                    <select
+                      className="form-control"
+                      value={editForm.admissionStatus}
+                      onChange={(e) => setEditForm({ ...editForm, admissionStatus: e.target.value })}
+                    >
+                      <option value="ADMITTED">ADMITTED</option>
+                      <option value="PENDING">PENDING</option>
+                      <option value="REJECTED">REJECTED</option>
+                      <option value="WITHDRAWN">WITHDRAWN</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Mode of Entry</label>
+                    <select
+                      className="form-control"
+                      value={editForm.modeOfEntry}
+                      onChange={(e) => setEditForm({ ...editForm, modeOfEntry: e.target.value })}
+                    >
+                      <option value="UTME">UTME</option>
+                      <option value="DIRECT_ENTRY">DIRECT ENTRY</option>
+                      <option value="TRANSFER">TRANSFER</option>
+                      <option value="POSTGRADUATE">POSTGRADUATE</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Programme Type</label>
+                    <select
+                      className="form-control"
+                      value={editForm.programType}
+                      onChange={(e) => setEditForm({ ...editForm, programType: e.target.value })}
+                    >
+                      <option value="Full-Time">Full-Time</option>
+                      <option value="Part-Time">Part-Time</option>
+                      <option value="Sandwich">Sandwich</option>
+                    </select>
+                  </div>
                 </div>
 
                 {/* Render Dynamic Custom Fields inputs */}
@@ -457,9 +604,49 @@ export default function StudentDetailPage() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-ghost" onClick={() => setShowEditModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Save Changes</button>
+                <button type="submit" className="btn btn-primary" disabled={saving}>
+                  {saving ? 'Saving Changes...' : 'Save Student Changes'}
+                </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Student Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 480, width: '100%' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--danger-500)' }}>
+                <AlertIcon size={20} color="var(--danger-500)" />
+                <h3 style={{ margin: 0, color: 'var(--danger-500)' }}>Confirm Account Deletion</h3>
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)}><CrossIcon size={16} /></button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+                Are you sure you want to permanently delete the student account for{' '}
+                <strong>{student.firstName} {student.lastName}</strong> (
+                <span style={{ fontFamily: 'monospace', color: 'var(--primary-200)' }}>{student.matricNumber}</span>)?
+              </p>
+              <div style={{ padding: '12px 14px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger-500)', fontSize: 13, color: 'var(--danger-500)' }}>
+                <strong>Warning:</strong> This action is irreversible. The student's login account, profile data, course registrations, and academic records will be permanently removed.
+              </div>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button
+                type="button"
+                className="btn"
+                style={{ background: 'var(--danger-500)', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                disabled={deleting}
+                onClick={handleDeleteStudent}
+              >
+                <TrashIcon size={16} />
+                {deleting ? 'Deleting Record...' : 'Delete Student Record'}
+              </button>
+            </div>
           </div>
         </div>
       )}

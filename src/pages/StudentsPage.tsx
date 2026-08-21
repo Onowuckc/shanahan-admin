@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
-import { SearchIcon, StudentsIcon, EyeIcon, CrossIcon, UploadIcon, PlusIcon } from '../components/Icons';
+import { SearchIcon, StudentsIcon, EyeIcon, CrossIcon, UploadIcon, PlusIcon, EditIcon, TrashIcon, AlertIcon } from '../components/Icons';
 
 interface Student {
   id: string;
@@ -12,9 +12,11 @@ interface Student {
   level: number;
   admissionStatus: string;
   modeOfEntry: string;
+  programType?: string;
+  phoneNumber?: string;
   passportPhotoUrl?: string;
   department: { id: string; name: string; code: string; faculty: { name: string } };
-  program: { name: string };
+  program: { id?: string; name: string };
   user: { email: string };
 }
 
@@ -61,6 +63,29 @@ export default function StudentsPage() {
     level: '100',
     modeOfEntry: 'UTME',
   });
+
+  // Edit Student Modal State
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedStudentForEdit, setSelectedStudentForEdit] = useState<any>(null);
+  const [updating, setUpdating] = useState(false);
+  const [editForm, setEditForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    gender: 'MALE',
+    level: '100',
+    departmentId: '',
+    programId: '',
+    admissionStatus: 'ADMITTED',
+    modeOfEntry: 'UTME',
+    programType: 'Full-Time',
+  });
+
+  // Delete Student Modal State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedStudentForDelete, setSelectedStudentForDelete] = useState<any>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Fetch departments & programs for dropdowns
   useEffect(() => {
@@ -131,6 +156,62 @@ export default function StudentsPage() {
       alert(err.response?.data?.error || 'Failed to create student account.');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const openEditModal = (student: any) => {
+    setSelectedStudentForEdit(student);
+    setEditForm({
+      firstName: student.firstName || '',
+      lastName: student.lastName || '',
+      email: student.user?.email || '',
+      phoneNumber: student.phoneNumber || '',
+      gender: student.gender || 'MALE',
+      level: String(student.level || 100),
+      departmentId: student.department?.id || '',
+      programId: student.program?.id || '',
+      admissionStatus: student.admissionStatus || 'ADMITTED',
+      modeOfEntry: student.modeOfEntry || 'UTME',
+      programType: student.programType || 'Full-Time',
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStudentForEdit) return;
+    setUpdating(true);
+    try {
+      await api.put(`/admin/students/${selectedStudentForEdit.id}`, editForm);
+      alert('Student record updated successfully.');
+      setShowEditModal(false);
+      fetchStudents();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to update student record.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const openDeleteModal = (student: any) => {
+    setSelectedStudentForDelete(student);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteStudent = async () => {
+    if (!selectedStudentForDelete) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/students/${selectedStudentForDelete.id}`);
+      alert(`Student record (${selectedStudentForDelete.matricNumber}) deleted successfully.`);
+      setShowDeleteModal(false);
+      fetchStudents();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to delete student record.');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -265,13 +346,29 @@ export default function StudentsPage() {
                   <td style={{ color: 'var(--text-muted)', fontSize: 12 }}>{s.modeOfEntry?.replace(/_/g, ' ')}</td>
                   <td>{statusBadge(s.admissionStatus)}</td>
                   <td>
-                    <button
-                      className="btn btn-ghost btn-sm btn-icon"
-                      onClick={(e) => { e.stopPropagation(); navigate(`/students/${s.id}`); }}
-                      title="View Details"
-                    >
-                      <EyeIcon size={15} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <button
+                        className="btn btn-ghost btn-sm btn-icon"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/students/${s.id}`); }}
+                        title="View Details"
+                      >
+                        <EyeIcon size={15} />
+                      </button>
+                      <button
+                        className="btn btn-ghost btn-sm btn-icon"
+                        onClick={(e) => { e.stopPropagation(); openEditModal(s); }}
+                        title="Edit Student Record"
+                      >
+                        <EditIcon size={15} color="var(--primary-300)" />
+                      </button>
+                      <button
+                        className="btn btn-ghost btn-sm btn-icon"
+                        onClick={(e) => { e.stopPropagation(); openDeleteModal(s); }}
+                        title="Delete Student Account"
+                      >
+                        <TrashIcon size={15} color="var(--danger-500)" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -428,6 +525,208 @@ export default function StudentsPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Student Modal */}
+      {showEditModal && selectedStudentForEdit && (
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 680, width: '100%' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <EditIcon size={18} color="var(--primary-300)" />
+                <h3 style={{ margin: 0 }}>Edit Student Record</h3>
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowEditModal(false)}><CrossIcon size={16} /></button>
+            </div>
+            <form onSubmit={handleUpdateStudent}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ padding: '8px 12px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Matriculation Number: </span>
+                  <strong style={{ fontFamily: 'monospace', color: 'var(--primary-200)' }}>{selectedStudentForEdit.matricNumber}</strong>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>First Name *</label>
+                    <input
+                      className="form-control"
+                      required
+                      value={editForm.firstName}
+                      onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Last Name *</label>
+                    <input
+                      className="form-control"
+                      required
+                      value={editForm.lastName}
+                      onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Email Address</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={editForm.email}
+                      onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Phone Number</label>
+                    <input
+                      className="form-control"
+                      value={editForm.phoneNumber}
+                      onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Department</label>
+                    <select
+                      className="form-control"
+                      value={editForm.departmentId}
+                      onChange={(e) => setEditForm({ ...editForm, departmentId: e.target.value })}
+                    >
+                      <option value="">Select Department</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Programme</label>
+                    <select
+                      className="form-control"
+                      value={editForm.programId}
+                      onChange={(e) => setEditForm({ ...editForm, programId: e.target.value })}
+                    >
+                      <option value="">Select Programme</option>
+                      {(editForm.departmentId ? programs.filter(p => p.departmentId === editForm.departmentId) : programs).map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Academic Level</label>
+                    <select
+                      className="form-control"
+                      value={editForm.level}
+                      onChange={(e) => setEditForm({ ...editForm, level: e.target.value })}
+                    >
+                      {LEVELS.map((l) => (
+                        <option key={l} value={l}>{l} Level</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Gender</label>
+                    <select
+                      className="form-control"
+                      value={editForm.gender}
+                      onChange={(e) => setEditForm({ ...editForm, gender: e.target.value })}
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Admission Status</label>
+                    <select
+                      className="form-control"
+                      value={editForm.admissionStatus}
+                      onChange={(e) => setEditForm({ ...editForm, admissionStatus: e.target.value })}
+                    >
+                      {ADMISSION_STATUSES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Mode of Entry</label>
+                    <select
+                      className="form-control"
+                      value={editForm.modeOfEntry}
+                      onChange={(e) => setEditForm({ ...editForm, modeOfEntry: e.target.value })}
+                    >
+                      {MODES.map((m) => (
+                        <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Program Type</label>
+                    <select
+                      className="form-control"
+                      value={editForm.programType}
+                      onChange={(e) => setEditForm({ ...editForm, programType: e.target.value })}
+                    >
+                      <option value="Full-Time">Full-Time</option>
+                      <option value="Part-Time">Part-Time</option>
+                      <option value="Sandwich">Sandwich</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowEditModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={updating}>
+                  {updating ? 'Saving Changes...' : 'Save Student Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Student Confirmation Modal */}
+      {showDeleteModal && selectedStudentForDelete && (
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 480, width: '100%' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--danger-500)' }}>
+                <AlertIcon size={20} color="var(--danger-500)" />
+                <h3 style={{ margin: 0, color: 'var(--danger-500)' }}>Confirm Account Deletion</h3>
+              </div>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowDeleteModal(false)}><CrossIcon size={16} /></button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.5 }}>
+                Are you sure you want to permanently delete the student account for{' '}
+                <strong>{selectedStudentForDelete.firstName} {selectedStudentForDelete.lastName}</strong> (
+                <span style={{ fontFamily: 'monospace', color: 'var(--primary-200)' }}>{selectedStudentForDelete.matricNumber}</span>)?
+              </p>
+              <div style={{ padding: '12px 14px', background: 'rgba(239, 68, 68, 0.08)', borderRadius: 'var(--radius-md)', border: '1px solid var(--danger-500)', fontSize: 13, color: 'var(--danger-500)' }}>
+                <strong>Warning:</strong> This action is irreversible. The student's login account, profile data, course registrations, and academic records will be permanently removed.
+              </div>
+            </div>
+            <div className="modal-footer" style={{ justifyContent: 'space-between' }}>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowDeleteModal(false)}>Cancel</button>
+              <button
+                type="button"
+                className="btn"
+                style={{ background: 'var(--danger-500)', color: '#fff', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                disabled={deleting}
+                onClick={handleDeleteStudent}
+              >
+                <TrashIcon size={16} />
+                {deleting ? 'Deleting Record...' : 'Delete Student Record'}
+              </button>
+            </div>
           </div>
         </div>
       )}
