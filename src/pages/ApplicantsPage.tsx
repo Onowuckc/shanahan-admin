@@ -136,6 +136,25 @@ export default function ApplicantsPage() {
     }
   };
 
+  const handleDeleteApplicant = async (app: Applicant) => {
+    if (!window.confirm(`Are you sure you want to permanently delete application ${app.applicationNo} (${app.firstName} ${app.lastName})?\n\nThis will remove the applicant record and user account from the system.`)) {
+      return;
+    }
+
+    setSavingStatus(true);
+    try {
+      await api.delete(`/admin/applicants/${app.id}`);
+      alert(`Application ${app.applicationNo} deleted successfully.`);
+      setShowModal(false);
+      fetchApplicants();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to delete applicant.');
+    } finally {
+      setSavingStatus(false);
+    }
+  };
+
   const handleOpenDetail = (app: Applicant) => {
     setSelectedApplicant(app);
     setShowModal(true);
@@ -395,6 +414,14 @@ export default function ApplicantsPage() {
                         Set to Pending
                       </button>
                     )}
+                    <button
+                      className="btn btn-ghost"
+                      style={{ color: '#ef4444', border: '1px solid #ef4444' }}
+                      disabled={savingStatus}
+                      onClick={() => handleDeleteApplicant(selectedApplicant)}
+                    >
+                      🗑️ Delete Application
+                    </button>
                   </div>
                 </div>
               </div>
