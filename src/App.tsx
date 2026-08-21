@@ -25,6 +25,11 @@ import OLevelRequirementsPage from './pages/OLevelRequirementsPage';
 import BiodataRequestsPage from './pages/BiodataRequestsPage';
 
 
+function RootRedirect() {
+  const token = localStorage.getItem('umis_token');
+  return <Navigate to={token ? "/dashboard" : "/login"} replace />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -32,7 +37,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<RootRedirect />} />
 
           {/* Protected — Admin Layout */}
           <Route element={<ProtectedRoute />}>
@@ -70,7 +75,7 @@ export default function App() {
           </Route>
 
           {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<RootRedirect />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
