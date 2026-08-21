@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import api from '../api/client';
-import { SearchIcon, StaffIcon, TrashIcon, AlertIcon, EditIcon, CrossIcon, UploadIcon } from '../components/Icons';
+import { SearchIcon, StaffIcon, TrashIcon, AlertIcon, EditIcon, CrossIcon, UploadIcon, PlusIcon } from '../components/Icons';
 
 
 interface Staff {
@@ -37,11 +37,23 @@ export default function StaffPage() {
   const [departmentId, setDepartmentId] = useState('');
 
   // Modals
+  const [showAddModal, setShowAddModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
-  
+
+  // Add Staff State
+  const [addForm, setAddForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    role: 'LECTURER',
+    phoneNumber: '',
+    departmentId: ''
+  });
+  const [creating, setCreating] = useState(false);
+
   // Upload State
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploadYear, setUploadYear] = useState(String(new Date().getFullYear()));
@@ -57,6 +69,38 @@ export default function StaffPage() {
     departmentId: ''
   });
   const [editMetadata, setEditMetadata] = useState<Record<string, any>>({});
+
+  const handleCreateStaff = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    try {
+      const { data } = await api.post('/admin/staff', addForm);
+      const creds = data.credentials || {};
+      alert(
+        `Staff Member Account Created Successfully!\n\n` +
+        `Staff ID: ${creds.staffId}\n` +
+        `Email: ${creds.email}\n` +
+        `Assigned Role: ${creds.role}\n` +
+        `Temporary Password: ${creds.temporaryPassword}\n\n` +
+        `Share these credentials with the staff member to allow login.`
+      );
+      setShowAddModal(false);
+      setAddForm({
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: 'LECTURER',
+        phoneNumber: '',
+        departmentId: ''
+      });
+      fetchStaff();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to create staff member.');
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const showToast = (msg: string) => {
     alert(msg);
@@ -181,8 +225,13 @@ export default function StaffPage() {
             {meta ? `${meta.total.toLocaleString()} staff members found` : 'Loading...'}
           </div>
         </div>
-        <div className="page-actions">
-          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowUploadModal(true)}><UploadIcon size={14} /> Bulk Import Staff</button>
+        <div className="page-actions" style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowAddModal(true)}>
+            <PlusIcon size={14} /> Add Staff Member
+          </button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowUploadModal(true)}>
+            <UploadIcon size={14} /> Bulk Import Staff
+          </button>
         </div>
       </div>
 
@@ -439,6 +488,106 @@ export default function StaffPage() {
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><TrashIcon size={14} /> Delete Staff Account</span>
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Add Staff Modal */}
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3 className="modal-title">Add Staff Member</h3>
+              <button className="modal-close" onClick={() => setShowAddModal(false)}><CrossIcon size={16} /></button>
+            </div>
+            <form onSubmit={handleCreateStaff}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="form-group">
+                    <label className="form-label">First Name *</label>
+                    <input
+                      className="form-control"
+                      value={addForm.firstName}
+                      onChange={(e) => setAddForm({ ...addForm, firstName: e.target.value })}
+                      placeholder="e.g. Chinaza"
+                      required
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Last Name *</label>
+                    <input
+                      className="form-control"
+                      value={addForm.lastName}
+                      onChange={(e) => setAddForm({ ...addForm, lastName: e.target.value })}
+                      placeholder="e.g. Ijomah"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Email Address *</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={addForm.email}
+                    onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                    placeholder="staff@shanahanuni.edu.ng"
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">System Access Role *</label>
+                  <select
+                    className="form-control"
+                    value={addForm.role}
+                    onChange={(e) => setAddForm({ ...addForm, role: e.target.value })}
+                    required
+                  >
+                    <option value="LECTURER">Lecturer / Academic Staff</option>
+                    <option value="DEPARTMENT_OFFICER">Department Officer</option>
+                    <option value="FACULTY_OFFICER">Faculty Officer</option>
+                    <option value="BURSARY_STAFF">Bursary / Finance Officer</option>
+                    <option value="REGISTRY_STAFF">Registry Staff</option>
+                    <option value="EXAMS_RECORDS_STAFF">Exams & Records Staff</option>
+                    <option value="STUDENT_AFFAIRS_STAFF">Student Affairs Staff</option>
+                    <option value="HOSTEL_ADMIN">Hostel Administrator</option>
+                    <option value="ICT_ADMIN">ICT Administrator</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Department (Optional)</label>
+                  <select
+                    className="form-control"
+                    value={addForm.departmentId}
+                    onChange={(e) => setAddForm({ ...addForm, departmentId: e.target.value })}
+                  >
+                    <option value="">None / General Administration</option>
+                    {departments.map((d) => (
+                      <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Phone Number (Optional)</label>
+                  <input
+                    className="form-control"
+                    value={addForm.phoneNumber}
+                    onChange={(e) => setAddForm({ ...addForm, phoneNumber: e.target.value })}
+                    placeholder="+234..."
+                  />
+                </div>
+              </div>
+
+              <div className="modal-footer">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowAddModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={creating}>
+                  {creating ? 'Creating Account...' : 'Create Staff Account'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
