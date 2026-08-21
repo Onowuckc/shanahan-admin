@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/client';
 import { SearchIcon, StudentsIcon, EyeIcon, CrossIcon, UploadIcon, PlusIcon } from '../components/Icons';
 
-
 interface Student {
   id: string;
   matricNumber: string;
@@ -42,13 +41,31 @@ export default function StudentsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+  const [programs, setPrograms] = useState<{ id: string; name: string; departmentId: string }[]>([]);
   const [filters, setFilters] = useState<FilterState>({
     search: '', departmentId: '', level: '', gender: '', admissionStatus: '', modeOfEntry: '',
   });
 
-  // Fetch departments for filter dropdown
+  // Add Student Modal State
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [addForm, setAddForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    gender: 'MALE',
+    dateOfBirth: '2005-01-01',
+    departmentId: '',
+    programId: '',
+    level: '100',
+    modeOfEntry: 'UTME',
+  });
+
+  // Fetch departments & programs for dropdowns
   useEffect(() => {
     api.get('/admin/departments').then((r) => setDepartments(r.data.data)).catch(() => {});
+    api.get('/admin/programs').then((r) => setPrograms(r.data.data || [])).catch(() => {});
   }, []);
 
   const fetchStudents = useCallback(async () => {
@@ -84,6 +101,39 @@ export default function StudentsPage() {
     setPage(1);
   };
 
+  const handleCreateStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addForm.firstName || !addForm.lastName || !addForm.departmentId || !addForm.programId) {
+      alert('Please fill in all required fields (First Name, Last Name, Department, Program).');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const { data } = await api.post('/admin/students', addForm);
+      const creds = data.credentials || {};
+      alert(
+        `🎉 Student Account Created Successfully!\n\n` +
+        `Matriculation Number: ${creds.matricNumber}\n` +
+        `Institutional Email: ${creds.email}\n` +
+        `Temporary Password: ${creds.temporaryPassword}\n\n` +
+        `Share these credentials with the student to allow login to the Student Portal.`
+      );
+      setShowAddModal(false);
+      setAddForm({
+        firstName: '', lastName: '', email: '', phoneNumber: '',
+        gender: 'MALE', dateOfBirth: '2005-01-01', departmentId: '', programId: '',
+        level: '100', modeOfEntry: 'UTME',
+      });
+      fetchStudents();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.error || 'Failed to create student account.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   const initials = (s: Student) => `${s.firstName[0]}${s.lastName[0]}`.toUpperCase();
 
   const statusBadge = (status: string) => {
@@ -92,6 +142,10 @@ export default function StudentsPage() {
   };
 
   const pages = meta ? Array.from({ length: Math.min(meta.totalPages, 7) }, (_, i) => i + 1) : [];
+
+  const availablePrograms = addForm.departmentId
+    ? programs.filter((p) => p.departmentId === addForm.departmentId)
+    : programs;
 
   return (
     <div className="animate-fade">
@@ -103,8 +157,12 @@ export default function StudentsPage() {
           </div>
         </div>
         <div className="page-actions">
-          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => navigate('/students/upload')}><UploadIcon size={14} /> Bulk Upload</button>
-          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><PlusIcon size={14} /> Add Student</button>
+          <button className="btn btn-ghost btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => navigate('/students/upload')}>
+            <UploadIcon size={14} /> Bulk Upload
+          </button>
+          <button className="btn btn-primary btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setShowAddModal(true)}>
+            <PlusIcon size={14} /> Add Student
+          </button>
         </div>
       </div>
 
@@ -161,7 +219,7 @@ export default function StudentsPage() {
           <div className="empty-state">
             <div className="empty-state-icon"><StudentsIcon size={48} color="#800020" /></div>
             <div className="empty-state-title">No students found</div>
-            <div className="empty-state-desc">Try adjusting your search or filter criteria.</div>
+            <div className="empty-state-desc">Try adjusting your search or click "Add Student" to create one.</div>
           </div>
         ) : (
           <table className="data-table">
@@ -237,6 +295,142 @@ export default function StudentsPage() {
           </div>
         )}
       </div>
+
+      {/* Add Student Modal */}
+      {showAddModal && (
+        <div className="modal-backdrop">
+          <div className="modal" style={{ maxWidth: 640, width: '100%' }}>
+            <div className="modal-header">
+              <h3>Create Student Record</h3>
+              <button className="btn btn-ghost btn-sm" onClick={() => setShowAddModal(false)}><CrossIcon size={16} /></button>
+            </div>
+            <form onSubmit={handleCreateStudent}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>First Name *</label>
+                    <input
+                      className="form-control"
+                      placeholder="e.g. Chidi"
+                      required
+                      value={addForm.firstName}
+                      onChange={(e) => setAddForm({ ...addForm, firstName: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Last Name *</label>
+                    <input
+                      className="form-control"
+                      placeholder="e.g. Okafor"
+                      required
+                      value={addForm.lastName}
+                      onChange={(e) => setAddForm({ ...addForm, lastName: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Email Address (Optional)</label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      placeholder="Auto-generated if empty"
+                      value={addForm.email}
+                      onChange={(e) => setAddForm({ ...addForm, email: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Phone Number</label>
+                    <input
+                      className="form-control"
+                      placeholder="e.g. 08012345678"
+                      value={addForm.phoneNumber}
+                      onChange={(e) => setAddForm({ ...addForm, phoneNumber: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Department *</label>
+                    <select
+                      className="form-control"
+                      required
+                      value={addForm.departmentId}
+                      onChange={(e) => setAddForm({ ...addForm, departmentId: e.target.value, programId: '' })}
+                    >
+                      <option value="">Select Department...</option>
+                      {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Academic Program *</label>
+                    <select
+                      className="form-control"
+                      required
+                      disabled={!addForm.departmentId}
+                      value={addForm.programId}
+                      onChange={(e) => setAddForm({ ...addForm, programId: e.target.value })}
+                    >
+                      <option value="">Select Program...</option>
+                      {availablePrograms.map((p) => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Level</label>
+                    <select
+                      className="form-control"
+                      value={addForm.level}
+                      onChange={(e) => setAddForm({ ...addForm, level: e.target.value })}
+                    >
+                      {LEVELS.map((l) => (
+                        <option key={l} value={l}>{l} Level</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Gender</label>
+                    <select
+                      className="form-control"
+                      value={addForm.gender}
+                      onChange={(e) => setAddForm({ ...addForm, gender: e.target.value })}
+                    >
+                      <option value="MALE">Male</option>
+                      <option value="FEMALE">Female</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="form-label" style={{ fontSize: 13, fontWeight: 600 }}>Mode of Entry</label>
+                    <select
+                      className="form-control"
+                      value={addForm.modeOfEntry}
+                      onChange={(e) => setAddForm({ ...addForm, modeOfEntry: e.target.value })}
+                    >
+                      {MODES.map((m) => (
+                        <option key={m} value={m}>{m.replace(/_/g, ' ')}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-ghost" onClick={() => setShowAddModal(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" disabled={creating}>
+                  {creating ? 'Creating Student...' : 'Create Student Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
